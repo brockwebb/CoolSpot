@@ -135,11 +135,15 @@ function safeHttpUrl(u) {
 }
 
 function card(it) {
-  const badge = it.kind === "center" ? '<span class="badge badge-cc">Cooling center</span>'
-    : it.emergency_services ? '<span class="badge badge-er">ER</span>'
-    : '<span class="badge badge-hosp">Hospital</span>';
+  const badge = it.kind !== "center"
+    ? (it.emergency_services ? '<span class="badge badge-er">ER</span>'
+                             : '<span class="badge badge-hosp">Hospital</span>')
+    : it.source_type === "designated"
+      ? '<span class="badge badge-desig">Designated site</span>'
+      : '<span class="badge badge-cc">Cooling center</span>';
   const hours = it.hours ? `<p class="hours">${esc(it.hours)}</p>`
     : it.kind === "center" ? '<p class="hours muted">Hours not listed — call ahead</p>' : "";
+  const notes = it.notes ? `<p class="card-note">${esc(it.notes)}</p>` : "";
   const phone = it.phone ? `<a href="tel:${esc(it.phone.replace(/[^\d+]/g, ""))}">${esc(it.phone)}</a> · ` : "";
   const validSourceUrl = safeHttpUrl(it.source_url);
   const sourceLink = validSourceUrl ? ` · <a href="${validSourceUrl}" target="_blank" rel="noopener">source</a>` : "";
@@ -147,6 +151,7 @@ function card(it) {
     <h3>${esc(it.name)} ${badge}</h3>
     <p>${esc(it.address)}, ${esc(it.city)}, ${esc(it.state)} — <b>${fmtKmMiles(it.km)}</b></p>
     ${hours}
+    ${notes}
     <p>${phone}<a class="btn" target="_blank" rel="noopener"
         href="${directionsUrl(it.name, it.address, it.city, it.state)}">Directions</a>${sourceLink}</p>
   </article>`;

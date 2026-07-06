@@ -16,12 +16,13 @@
       ]
     },
     "md": {
-      "count": 60,
+      "count": 96,
       "retrieved_date": "2026-07-06",
       "source_urls": [
         "https://princegeorges.maps.arcgis.com/apps/webappviewer/index.html?id=6c7090a859d54539976fcfcc4dc874bf",
         "https://www.aacounty.org/emergency-management/cooling-relief",
-        "https://www.howardcountymd.gov/community-sustainability/warming-and-cooling-center-information"
+        "https://www.howardcountymd.gov/community-sustainability/warming-and-cooling-center-information",
+        "https://www.baltimorecountymd.gov/departments/health/hot-weather"
       ]
     }
   },

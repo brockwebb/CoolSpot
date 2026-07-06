@@ -167,6 +167,23 @@ test("place-name search: suitland md 20746 tolerates a trailing ZIP after the ge
   await expect(page.locator(".result-card").first()).toBeVisible();
 });
 
+test("designated Baltimore sites carry the badge and caveat", async ({ page }) => {
+  // Data-driven: confirm the shipped payload has designated sites, then drive the UI
+  // via a real place search near Baltimore County (Towson) to render one.
+  await page.goto("/");
+  const hasDesignated = await page.evaluate(async () => {
+    const fs = (await (await fetch("data/cooling_centers.geojson")).json()).features;
+    return fs.some((f) => f.properties.source_type === "designated");
+  });
+  test.skip(!hasDesignated, "no designated sites in payload");
+  await page.fill("#address-input", "towson md");
+  await page.click('#address-form button[type="submit"]');
+  await expect(page.locator("#search-status")).toContainText("Towson, MD");
+  const designatedCard = page.locator(".result-card", { hasText: "Designated site" }).first();
+  await expect(designatedCard).toBeVisible();
+  await expect(designatedCard.locator(".card-note")).toContainText(/call ahead/i);
+});
+
 test("gibberish still reaches the area picker", async ({ page }) => {
   await page.goto("/");
   await page.fill("#address-input", "zzqx nowhere");
