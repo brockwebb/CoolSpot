@@ -2,8 +2,9 @@
 """Baltimore County is intentionally absent from CASES: its cooling-locations
 page (tests/fixtures/md_baltimore_county.html) lists only category links
 (library system, senior centers) and phone numbers to "check locations" —
-no scrapeable per-center addresses. Per the task-10 drop rule, its parser was
-deleted rather than faking records. See .superpowers/sdd/task-10-report.md."""
+no scrapeable per-center addresses. Its parser was deleted rather than
+faking records. See data/sources/md_county_registry.json (review_note) and
+README "known gaps"."""
 from pathlib import Path
 
 import pytest

@@ -22,6 +22,8 @@ test("analysis view renders choropleth and legend", async ({ page }) => {
   await page.goto("/analysis.html");
   await expect(page.locator("#legend .legend-row").first()).toBeVisible({ timeout: 15000 });
   await expect(page.locator("#legend h3")).toContainText("CRE-Heat");
+  await expect(page.locator("#map path.leaflet-interactive").first()).toBeAttached({ timeout: 15000 });
+  await expect(page.locator("#freshness")).toContainText("centers", { timeout: 10000 });
 });
 
 test("analysis view layer switch is interactive and performant", async ({ page }) => {

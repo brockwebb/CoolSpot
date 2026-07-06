@@ -1,5 +1,5 @@
 // finder.js — address search -> nearest cooling centers + hospitals.
-import { loadJSON, initMap, haversineKm, fmtKmMiles, directionsUrl, geocodeAddress } from "./common.js";
+import { loadJSON, initMap, haversineKm, fmtKmMiles, directionsUrl, geocodeAddress, esc, renderFreshness } from "./common.js";
 
 const state = { map: null, cfg: null, centers: [], hospitals: [], markers: L.layerGroup(), youMarker: null };
 
@@ -27,13 +27,6 @@ async function boot() {
     if (a) showNearest(a.lat, a.lon, `Showing results near ${a.label}`);
   });
   document.getElementById("address-form").addEventListener("submit", onSearch);
-}
-
-function renderFreshness(manifest) {
-  const parts = Object.entries(manifest.jurisdictions)
-    .map(([j, m]) => `${j.toUpperCase()}: ${m.count} centers (verified ${m.retrieved_date})`);
-  document.getElementById("freshness").textContent =
-    `Data updated ${manifest.generated} — ${parts.join(" · ")} · ${manifest.hospitals.count} hospitals`;
 }
 
 async function onSearch(ev) {
@@ -68,7 +61,7 @@ function showNearest(lat, lon, label) {
   const { cfg } = state;
   document.getElementById("search-status").textContent = label;
   const centers = nearest(state.centers, lat, lon, cfg.nearest_n);
-  const hospitals = nearest(state.hospitals.filter((h) => h.emergency_services !== false), lat, lon, 3);
+  const hospitals = nearest(state.hospitals.filter((h) => h.emergency_services !== false), lat, lon, cfg.nearest_hospitals);
   state.markers.clearLayers();
   if (state.youMarker) state.youMarker.remove();
   state.youMarker = L.circleMarker([lat, lon], { radius: 8, color: "#1d4ed8", fillOpacity: 0.9 })
@@ -84,11 +77,6 @@ function showNearest(lat, lon, label) {
     state.map.setView([lat, lon], 12);
   }
   renderResults(centers, hospitals);
-}
-
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
 function safeHttpUrl(u) {

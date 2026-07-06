@@ -74,6 +74,10 @@ Recommended cadence:
   and update county adapter URLs there if a source moves.
 - Census CRE-Heat/LACE/ACS/TIGER vintages are pinned in `config/pipeline.yaml`; bump them when the
   Bureau publishes a new year and re-run `coolspot all`.
+  **Known limitation:** downloads are cached to disk under fixed filenames, so changing a vintage
+  URL in `config/pipeline.yaml` alone will not fetch new data — the pipeline finds the cached file
+  and re-publishes stale data. Delete `data/raw/` before re-running `coolspot all` whenever you bump
+  a vintage. Tracked as a follow-up for the next data season (fixed caching, or cache keyed by URL).
 
 All tunables (source URLs, vintages, distance thresholds, geocoder batch size) live in
 `config/pipeline.yaml` — there are no hardcoded values to hunt down in `pipeline/`.
@@ -81,21 +85,28 @@ All tunables (source URLs, vintages, distance thresholds, geocoder batch size) l
 ## Architecture
 
 ```
-config/pipeline.yaml   -- all tunables (URLs, vintages, thresholds)
-pipeline/               -- offline Python pipeline (uv run coolspot <stage>)
-  cooling/              -- per-jurisdiction adapters (DC, VA, MD counties) -> shared schema
-  census/, acs/         -- CRE-Heat/LACE CSV + ACS API acquisition
-  boundaries/           -- TIGER/Line tract shapefiles -> attributed GeoJSON
-  hospitals/            -- CMS hospital roster acquisition
-  geocode/              -- Census batch geocoder client + quarantine
-  publish/              -- writes site/data/*.geojson + manifest.json + site_config.json
-site/                   -- static site (no build step, no server)
-  index.html            -- finder view
-  analysis.html         -- heat vulnerability map
-  js/                   -- vanilla JS + ES modules (common.js, finder.js, analysis.js)
-  data/                 -- pipeline output, consumed directly by the browser
-tests/                  -- pytest suite (pipeline)
-tests-e2e/              -- Playwright smoke tests (real-browser, against site/)
+config/pipeline.yaml           -- all tunables (URLs, vintages, thresholds)
+pipeline/                      -- offline Python pipeline (uv run coolspot <stage>)
+  acquire/
+    census.py                 -- CRE-Heat/LACE/ACS acquisition
+    boundaries.py              -- TIGER/Line tract shapefiles -> attributed GeoJSON
+    hospitals.py                -- HealthData.gov/CMS hospital roster acquisition
+    cooling/
+      dc.py                    -- DC HSEMA ArcGIS adapter
+      va.py                    -- Virginia Dept. of Health / 211 Virginia adapter
+      md.py                    -- Prince George's County ArcGIS adapter
+      md_counties.py            -- Anne Arundel / Howard HTML adapters
+      runner.py                -- fan-out across jurisdiction adapters -> shared schema
+  geocode.py                   -- Census batch geocoder client + quarantine
+  publish.py                   -- writes site/data/cooling_centers.geojson + manifest.json + site_config.json
+  publish_tracts.py            -- writes site/data/tracts_{dc,md,va}.geojson
+site/                          -- static site (no build step, no server)
+  index.html                   -- finder view
+  analysis.html                -- heat vulnerability map
+  js/                          -- vanilla JS + ES modules (common.js, finder.js, analysis.js)
+  data/                        -- pipeline output, consumed directly by the browser
+tests/                         -- pytest suite (pipeline)
+tests-e2e/                     -- Playwright smoke tests (real-browser, against site/)
 ```
 
 Data flows one direction: pipeline stages read raw sources -> normalize -> geocode -> publish
@@ -104,7 +115,8 @@ those static files plus the live Census JSONP geocoder for address lookup.
 
 See `docs/design/AD-001-architecture.md` for the full set of architectural decisions (why static +
 offline pipeline, why vanilla JS, why JSONP for geocoding, why LACE was chosen as the AC-evaluation
-data product, etc.) and `docs/specification.md` for the full spec.
+data product, etc.), `docs/superpowers/specs/2026-07-05-coolspot-design.md` for the full spec, and
+`docs/superpowers/plans/2026-07-05-coolspot.md` for the implementation plan.
 
 ## Disclaimer
 

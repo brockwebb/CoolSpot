@@ -30,6 +30,18 @@ export function directionsUrl(name, address, city, state) {
   return `https://www.google.com/maps/dir/?api=1&destination=${dest}`;
 }
 
+export function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+export function renderFreshness(manifest) {
+  const parts = Object.entries(manifest.jurisdictions)
+    .map(([j, m]) => `${j.toUpperCase()}: ${m.count} centers (verified ${m.retrieved_date})`);
+  document.getElementById("freshness").textContent =
+    `Data updated ${manifest.generated} — ${parts.join(" · ")} · ${manifest.hospitals.count} hospitals`;
+}
+
 // Census Geocoder sends no CORS headers (verified 2026-07-05); JSONP is the
 // only keyless in-browser path. See AD-001 #4.
 export function geocodeAddress(oneline, timeoutMs = 8000) {
@@ -37,7 +49,16 @@ export function geocodeAddress(oneline, timeoutMs = 8000) {
     const cb = "coolspot_geo_" + Math.random().toString(36).slice(2);
     const script = document.createElement("script");
     const timer = setTimeout(() => { cleanup(); reject(new Error("Geocoder timed out")); }, timeoutMs);
-    function cleanup() { delete window[cb]; script.remove(); clearTimeout(timer); }
+    function cleanup() {
+      // Reassign to a no-op instead of `delete window[cb]`: if the JSONP
+      // response arrives after the timeout has already fired and cleaned up,
+      // the callback script tag may still invoke window[cb] once it loads —
+      // deleting the property would make that a ReferenceError instead of a
+      // harmless call into a function that does nothing.
+      window[cb] = () => {};
+      script.remove();
+      clearTimeout(timer);
+    }
     window[cb] = (data) => {
       cleanup();
       const m = data?.result?.addressMatches?.[0];

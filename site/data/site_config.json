@@ -1,5 +1,6 @@
 {
   "nearest_n": 10,
+  "nearest_hospitals": 3,
   "gap_distance_km": 8.0,
   "map_center": [
     38.6,

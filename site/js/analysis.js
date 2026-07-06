@@ -1,5 +1,5 @@
 // analysis.js — tract choropleths + cooling-center overlay + coverage gaps.
-import { loadJSON, initMap } from "./common.js";
+import { loadJSON, initMap, esc, renderFreshness } from "./common.js";
 
 const LAYERS = {
   pred3_pe:      { label: "% with 3+ heat-vulnerability factors (CRE-Heat 2022, experimental)", fmt: (v) => `${v}%`, stops: [5, 10, 15, 25, 40] },
@@ -15,11 +15,6 @@ const NO_DATA = "#d7d7d7";
 
 const state = { map: null, cfg: null, tracts: null, layerKey: "pred3_pe", tractLayer: null,
                 centersLayer: null, hospitalsLayer: null, onlyGaps: false };
-
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
 
 function colorFor(value, stops) {
   if (value == null) return NO_DATA;
@@ -73,12 +68,14 @@ function redraw() {
 }
 
 async function boot() {
-  const [cfg, dc, md, va, centersFC, hospitalsFC] = await Promise.all([
+  const [cfg, dc, md, va, centersFC, hospitalsFC, manifest] = await Promise.all([
     loadJSON("data/site_config.json"),
     loadJSON("data/tracts_dc.geojson"), loadJSON("data/tracts_md.geojson"), loadJSON("data/tracts_va.geojson"),
     loadJSON("data/cooling_centers.geojson"), loadJSON("data/hospitals.geojson"),
+    loadJSON("data/manifest.json"),
   ]);
   state.cfg = cfg;
+  renderFreshness(manifest);
   state.map = initMap("map", cfg);
   state.tracts = { type: "FeatureCollection", features: [...dc.features, ...md.features, ...va.features] };
   state.tractLayer = L.geoJSON(state.tracts, { style: styleFeature, onEachFeature: onEachTract }).addTo(state.map);

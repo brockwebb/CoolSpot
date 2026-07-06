@@ -7,9 +7,9 @@ Baltimore County was captured (tests/fixtures/md_baltimore_county.html) and
 inspected but has NO parser here: its hot-weather page lists only category
 descriptions (public library system, recreation centers, senior centers)
 with a "check locations" link or phone number for each — no scrapeable
-per-center addresses on the page itself. Per the task-10 drop rule this
-county was dropped rather than faking records; see
-.superpowers/sdd/task-10-report.md for the gap note."""
+per-center addresses on the page itself. This county was dropped rather than
+faking records; see data/sources/md_county_registry.json (review_note) and
+the README "Deferred / known gaps" section for the gap note."""
 from __future__ import annotations
 
 import re

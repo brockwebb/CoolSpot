@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 import math
 from datetime import date
-from pathlib import Path
 
 from pipeline import publish_tracts
 from pipeline.config import PROJECT_ROOT
@@ -92,6 +91,7 @@ def run(cfg: dict) -> None:
 
     (out_dir / "site_config.json").write_text(json.dumps({
         "nearest_n": cfg["publish"]["nearest_n"],
+        "nearest_hospitals": cfg["publish"]["nearest_hospitals"],
         "gap_distance_km": cfg["publish"]["gap_distance_km"],
         "map_center": cfg["publish"]["map_center"],
         "map_zoom": cfg["publish"]["map_zoom"],

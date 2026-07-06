@@ -38,7 +38,8 @@ cooling_sources:
     # baltimore_county intentionally omitted: its hot-weather page (captured
     # 2026-07-05) lists only category descriptions and phone/link
     # "check locations" pointers, no scrapeable per-center addresses.
-    # See tests/fixtures/md_baltimore_county.html and .superpowers/sdd/task-10-report.md.
+    # See tests/fixtures/md_baltimore_county.html, data/sources/md_county_registry.json
+    # (review_note), and README "known gaps".
     county_pages:
       anne_arundel: "https://www.aacounty.org/emergency-management/cooling-relief"
       howard: "https://www.howardcountymd.gov/community-sustainability/warming-and-cooling-center-information"
@@ -48,6 +49,7 @@ publish:
   coord_precision: 5
   min_geoid_match_rate: 0.99
   nearest_n: 10
+  nearest_hospitals: 3
   gap_distance_km: 8.0
   request_timeout_s: 60
   map_center: [38.6, -77.6]

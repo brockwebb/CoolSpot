@@ -1,3 +1,5 @@
+import copy
+
 from pipeline.acquire.cooling.dc import parse
 
 DC_GEOJSON = {"type": "FeatureCollection", "features": [{
@@ -26,7 +28,7 @@ def test_parse_dc_maps_fields():
 
 
 def test_parse_dc_handles_unsplittable_address():
-    feats = dict(DC_GEOJSON)
+    feats = copy.deepcopy(DC_GEOJSON)
     feats["features"][0]["properties"]["USER_Address"] = "901 G St NW"
     r = parse(feats, "2026-07-05", "https://example.gov/dc-source")[0]
     assert r["address"] == "901 G St NW" and r["city"] == "Washington" and r["state"] == "DC"
