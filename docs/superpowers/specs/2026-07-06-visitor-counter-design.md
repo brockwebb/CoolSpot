@@ -69,10 +69,11 @@ One async script tag before `</body>` on **both** pages:
 
 ### 3. Owner-side setup (one-time, by the owner)
 
-In GoatCounter settings, enable the **visitor-counter / public count** display option (this
-exposes only the aggregate count via `/counter/*`, NOT the full dashboard). The exact setting
-name is verified at build time; if enabling the count requires "public statistics," that is
-called out to the owner before shipping so it is a conscious choice.
+In GoatCounter settings, enable the setting named exactly **"allow using the visitor
+counter"** (verified 2026-07-06 — the `/counter/TOTAL.svg` endpoint returns HTTP 403 with
+that message until it is on). It exposes only the aggregate count via `/counter/*`, NOT the
+full dashboard. The badge is wired and deployed; it stays invisible (fail-silent) until the
+owner flips this one toggle.
 
 ## Cosmetic tradeoff (accepted)
 
