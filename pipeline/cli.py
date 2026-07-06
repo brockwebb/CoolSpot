@@ -9,6 +9,7 @@ from pipeline.config import load_config
 from pipeline.acquire import census as acquire_census_mod
 from pipeline.acquire import hospitals as acquire_hospitals_mod
 from pipeline.acquire.cooling import runner as acquire_cooling_mod
+from pipeline import geocode as geocode_mod
 
 
 def _not_implemented(name: str) -> Callable[[dict], None]:
@@ -21,7 +22,7 @@ COMMANDS: dict[str, Callable[[dict], None]] = {
     "acquire-census": acquire_census_mod.run,
     "acquire-hospitals": acquire_hospitals_mod.run,
     "acquire-cooling": acquire_cooling_mod.run,
-    "geocode": _not_implemented("geocode"),
+    "geocode": geocode_mod.run,
     "publish": _not_implemented("publish"),
 }
 
