@@ -50,3 +50,14 @@ publish:
   nearest_n: 10
   gap_distance_km: 8.0
   request_timeout_s: 60
+  map_center: [38.6, -77.6]
+  map_zoom: 7
+  fallback_areas:
+    - {label: "Washington, DC", lat: 38.9047, lon: -77.0164, zoom: 12}
+    - {label: "Baltimore, MD", lat: 39.2904, lon: -76.6122, zoom: 12}
+    - {label: "Annapolis, MD", lat: 38.9784, lon: -76.4922, zoom: 13}
+    - {label: "Columbia, MD", lat: 39.2037, lon: -76.8610, zoom: 13}
+    - {label: "Richmond, VA", lat: 37.5407, lon: -77.4360, zoom: 12}
+    - {label: "Norfolk, VA", lat: 36.8508, lon: -76.2859, zoom: 12}
+    - {label: "Roanoke, VA", lat: 37.2710, lon: -79.9414, zoom: 13}
+    - {label: "Northern Virginia", lat: 38.8462, lon: -77.3064, zoom: 11}

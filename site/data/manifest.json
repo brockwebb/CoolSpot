@@ -1,0 +1,24 @@
+{
+  "generated": "2026-07-06",
+  "jurisdictions": {
+    "dc": {
+      "count": 145,
+      "retrieved_date": "2026-07-06",
+      "source_url": "https://opendata.dc.gov/datasets/9ee42555df88442fb357d77147bfdca3"
+    },
+    "va": {
+      "count": 164,
+      "retrieved_date": "2026-07-06",
+      "source_url": "https://www.vdh.virginia.gov/environmental-public-health-tracking/climate-weather/cooling-centers/"
+    },
+    "md": {
+      "count": 60,
+      "retrieved_date": "2026-07-06",
+      "source_url": "https://princegeorges.maps.arcgis.com/apps/webappviewer/index.html?id=6c7090a859d54539976fcfcc4dc874bf"
+    }
+  },
+  "hospitals": {
+    "count": 152,
+    "roster_note": "coordinate roster frozen May 2024; attributes current via CMS"
+  }
+}
