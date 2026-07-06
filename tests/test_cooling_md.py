@@ -1,4 +1,4 @@
-from pipeline.acquire.cooling.md import parse_hub, parse_pg
+from pipeline.acquire.cooling.md import clean_text, parse_hub, parse_pg
 
 PG_JSON = {"features": [{
     "attributes": {"Name": "Bowie Community Center", "Address": "3209 Stonybrook Dr, Bowie, MD 20716",
@@ -45,3 +45,11 @@ def test_parse_hub_fixture_county_count():
     entries = parse_hub(hub_html, "2026-07-05")
     # If this fails, the MDH hub page structure changed — update fixture and count
     assert len(entries) == 24, f"Expected 24 counties in MDH hub, got {len(entries)}"
+    assert all("County / City" not in e["county"] for e in entries)
+    garrett = [e for e in entries if e["county"] == "Garrett County"]
+    assert len(garrett) == 1
+    assert garrett[0]["county"] == "Garrett County"
+
+
+def test_clean_text_strips_zero_width_and_nbsp():
+    assert clean_text("​​Garrett\xa0County​") == "Garrett County"

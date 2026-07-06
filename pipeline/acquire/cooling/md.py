@@ -16,6 +16,11 @@ MD_ADDR_RE = re.compile(r"^(?P<street>.*?),\s*(?P<city>[^,]+),\s*MD\s*(?P<zip>\d
 PG_SOURCE = "https://princegeorges.maps.arcgis.com/apps/webappviewer/index.html?id=6c7090a859d54539976fcfcc4dc874bf"
 
 
+def clean_text(s: str) -> str:
+    """Strip zero-width and normalize non-breaking spaces from MDH page text."""
+    return s.replace("​", "").replace("\xa0", " ").strip()
+
+
 def fetch_pg(cfg: dict, timeout: int) -> dict:
     r = requests.get(cfg["cooling_sources"]["md"]["pg_arcgis_query_url"],
                      params={"where": "1=1", "outFields": "*", "f": "json", "outSR": 4326}, timeout=timeout)
@@ -66,19 +71,20 @@ def parse_hub(html: str, retrieved_date: str) -> list[dict]:
     soup = BeautifulSoup(html, "html.parser")
     entries = []
     for tr in soup.select("table tr"):
+        if tr.find_all("th"):
+            continue
         cells = tr.find_all("td")
         if len(cells) < 2:
             continue
-        county = cells[0].get_text(strip=True)
+        county = clean_text(cells[0].get_text())
         if not county:
             continue
-        # Skip header row: "County / City" text or no links + "Main Phone number"
-        links = [a["href"] for c in cells for a in c.find_all("a", href=True)]
-        if "County / City" in county or (not links and "Main" in cells[1].get_text()):
+        if "County / City" in county:
             continue
+        links = [a["href"] for c in cells for a in c.find_all("a", href=True)]
         entries.append({
             "county": county,
-            "phone": cells[1].get_text(strip=True),
+            "phone": clean_text(cells[1].get_text()),
             "links": links,
             "retrieved_date": retrieved_date,
         })
