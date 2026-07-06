@@ -51,7 +51,7 @@ test("analysis view layer switch is interactive and performant", async ({ page }
   const loadToLegendMs = Date.now() - loadStart;
 
   const switchStart = Date.now();
-  await page.locator('#layer-picker input[value="no_ac_pe"]').click();
+  await page.locator('#layer-picker input[value="no_ac"]').click();
   await expect(page.locator("#legend h3")).toContainText("without air conditioning");
   const layerSwitchMs = Date.now() - switchStart;
 
