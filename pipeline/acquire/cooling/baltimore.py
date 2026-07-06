@@ -47,9 +47,20 @@ CITY_STATE_ZIP_RE = re.compile(r"^(?P<city>[^,]+),\s*Maryland\s*(?P<zip>\d{5})?"
 # are in scope for a "designated cooling site" record.
 SENIOR_CENTER_NAME_RE = re.compile(r"senior center$", re.IGNORECASE)
 
+# A branch/center taken offline (e.g. "CLOSED FOR RENOVATION") must never be published
+# as an available cooling site — publishing a closed location during a heat emergency
+# is a safety hazard, not a data-quality nit. Case-insensitive so it also catches
+# "Closed", "Temporarily closed", etc. Re-checked on every run, so a branch reappears
+# automatically once the source drops the notice.
+CLOSED_RE = re.compile(r"closed", re.IGNORECASE)
+
 
 def _slug(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def _is_closed(name: str, lines: list[str]) -> bool:
+    return bool(CLOSED_RE.search(name)) or any(CLOSED_RE.search(l) for l in lines)
 
 
 def _record(kind: str, name: str, street: str, city: str, zc: str, directory_url: str,
@@ -104,6 +115,9 @@ def parse_libraries(raw, retrieved_date: str) -> list[dict]:
             print(f"!! baltimore[libraries]: skipped card with missing name/address: {art.get_text(' ', strip=True)[:80]!r}")
             continue
         lines = [l for l in addr_el.stripped_strings if l.lower() != "address"]
+        if _is_closed(name, lines):
+            print(f"!! baltimore: skipping closed facility: {name!r}")
+            continue
         if len(lines) < 2:
             print(f"!! baltimore[libraries]: skipped unparseable address for {name!r}: {lines!r}")
             continue
@@ -112,21 +126,66 @@ def parse_libraries(raw, retrieved_date: str) -> list[dict]:
         if not m:
             print(f"!! baltimore[libraries]: skipped unparseable city/zip line for {name!r}: {lines[-1]!r}")
             continue
-        recs.append(_record("lib", name, street, m.group("city"), m.group("zip") or "",
+        # The source never disambiguates branches from same-named senior centers, and a
+        # bare branch name ("Arbutus") is unclear on a public finder — append "Library".
+        # The id slug is derived from this same enriched name (e.g. md-baltimore-lib-
+        # arbutus-library); that's a one-time, cosmetic slug change, not worth threading
+        # a separate id-vs-display-name parameter through _record for.
+        recs.append(_record("lib", f"{name} Library", street, m.group("city"), m.group("zip") or "",
                              directory_url, retrieved_date, LIB_CAVEAT))
     return recs
 
 
+# Safety cap on how many senior-center directory pages we'll fetch before giving up.
+# The directory currently reports ~23 results over 3 pages (10/page); this cap is
+# generous headroom, not a tuned expectation — if the county's listing grows past this
+# many pages, fetch_seniors raises RuntimeError rather than silently truncating.
+SENIORS_MAX_PAGES = 10
+
+
+def _page_result_info(html: str) -> tuple[int, int | None]:
+    """Pure helper (testable against a fixture page) for one directory page: how many
+    center/program cards it contains, and the "Displaying N results" total it reports
+    (None if that header isn't present on the page)."""
+    soup = BeautifulSoup(html, "html.parser")
+    row_count = len(soup.select("article.c-teaser"))
+    m = re.search(r"Displaying\s+(\d+)\s+results", html)
+    total = int(m.group(1)) if m else None
+    return row_count, total
+
+
 def fetch_seniors(cfg: dict, timeout: int):
     url = cfg["cooling_sources"]["md"]["baltimore"]["seniors_url"]
-    pages = []
-    # Drupal view is paginated 10/page; the directory reports "Displaying 23
-    # results" across 3 pages (?page=0 implicit, ?page=1, ?page=2).
-    for page in range(3):
+    pages: list[str] = []
+    fetched_rows = 0
+    total_expected: int | None = None
+    for page in range(SENIORS_MAX_PAGES):
         page_url = url if page == 0 else f"{url}?page={page}"
         r = requests.get(page_url, timeout=timeout, headers={"User-Agent": UA})
         r.raise_for_status()
-        pages.append(r.text)
+        html = r.text
+        pages.append(html)
+        row_count, page_total = _page_result_info(html)
+        if total_expected is None:
+            total_expected = page_total
+        fetched_rows += row_count
+        # Stop once a page comes back with no rows (past the last real page), or once
+        # we've collected at least as many rows as the directory's own "Displaying N
+        # results" header claims exist. Self-terminating: it adapts if the county adds
+        # or removes a page instead of silently truncating at a hardcoded page count.
+        if row_count == 0 or (total_expected is not None and fetched_rows >= total_expected):
+            break
+    else:
+        raise RuntimeError(
+            f"baltimore[seniors]: hit the {SENIORS_MAX_PAGES}-page safety cap with only "
+            f"{fetched_rows}/{total_expected!r} results fetched — directory may have grown; "
+            "raise SENIORS_MAX_PAGES or investigate."
+        )
+    if total_expected is not None and fetched_rows < total_expected:
+        raise RuntimeError(
+            f"baltimore[seniors]: expected {total_expected} results per directory header but "
+            f"only fetched {fetched_rows} across {len(pages)} page(s)."
+        )
     return "\n".join(pages)
 
 
@@ -157,6 +216,9 @@ def parse_seniors(raw, retrieved_date: str) -> list[dict]:
             print(f"!! baltimore[seniors]: skipped unparseable address for {name!r}")
             continue
         lines = [l for l in lines if "address" not in l.lower()]
+        if _is_closed(name, lines):
+            print(f"!! baltimore: skipping closed facility: {name!r}")
+            continue
         if len(lines) < 2:
             print(f"!! baltimore[seniors]: skipped unparseable address for {name!r}: {lines!r}")
             continue
