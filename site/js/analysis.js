@@ -74,7 +74,7 @@ function fmtOrNA(v, fmt) {
 }
 
 function tractTitle(p) {
-  return p.tract_name && p.county ? `${p.tract_name} — ${p.county}, ${p.state_abbr}` : `Tract ${p.GEOID}`;
+  return p.tract_name && p.county && p.state_abbr ? `${p.tract_name} — ${p.county}, ${p.state_abbr}` : `Tract ${p.GEOID}`;
 }
 
 function tractDetailsHTML(p) {

@@ -115,6 +115,6 @@ test("tract click opens popup and fills slim bar with county name", async ({ pag
   // can sit visually on top of a tiny/sliver tract path, stealing the click.
   await page.locator("#show-centers").uncheck();
   await page.locator("#map path.leaflet-interactive").first().click({ force: true });
-  await expect(page.locator(".leaflet-popup-content h3").first()).toContainText(/Census Tract|Tract/);
+  await expect(page.locator(".leaflet-popup-content h3").first()).toContainText(/Census Tract .+ — .*(County|city|District of Columbia)/);
   await expect(page.locator("#tract-info h3")).toContainText(/County|city|District of Columbia/);
 });
