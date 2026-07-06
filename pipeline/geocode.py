@@ -49,6 +49,10 @@ def apply_geocodes(records: list[dict], geocodes: dict[str, dict]) -> tuple[list
 
 
 def run(cfg: dict) -> None:
+    if not PENDING_PATH.is_file():
+        raise RuntimeError(
+            f"{PENDING_PATH} not found — run `coolspot acquire-cooling` before `coolspot geocode`."
+        )
     pending = json.loads(PENDING_PATH.read_text())["records"]
     need = [r for r in pending if "lat" not in r]
     geocodes: dict[str, dict] = {}

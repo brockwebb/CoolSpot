@@ -1,3 +1,6 @@
+import pytest
+
+from pipeline import geocode
 from pipeline.geocode import apply_geocodes, build_batch_csv, parse_batch_response
 
 NEEDS = {"id": "md-howard-x", "name": "X", "address": "10 Main St", "city": "Columbia", "state": "MD",
@@ -28,3 +31,11 @@ def test_apply_geocodes_partitions():
                                         parse_batch_response(BATCH_RESPONSE))
     assert {r["id"] for r in located} == {"md-howard-x", "dc-1"}
     assert unlocated[0]["id"] == "md-fail-y"
+
+
+def test_run_fails_loud_on_missing_pending(tmp_path, monkeypatch):
+    """Precondition check: run() raises RuntimeError if PENDING_PATH does not exist."""
+    nonexistent = tmp_path / "nonexistent.json"
+    monkeypatch.setattr(geocode, "PENDING_PATH", nonexistent)
+    with pytest.raises(RuntimeError, match="acquire-cooling"):
+        geocode.run({})
