@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CoolSpot — Find Cooling Centers Near You (MD · VA · DC)</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <h1>CoolSpot</h1>
+  <p class="lede">Find cooling centers and hospitals near you in Maryland, Virginia, and Washington, DC.</p>
+  <p class="disclaimer">Informational only. Not an emergency service. In an emergency call 911.
+     Cooling center hours change — call before you go.</p>
+  <nav><a href="index.html" aria-current="page">Finder</a> · <a href="analysis.html">Heat vulnerability map</a></nav>
+</header>
+<main>
+  <section class="search-panel" aria-label="Address search">
+    <form id="address-form">
+      <label for="address-input">Your address</label>
+      <input id="address-input" type="text" autocomplete="street-address"
+             placeholder="e.g. 901 G St NW, Washington, DC" required />
+      <button type="submit">Find cooling centers</button>
+    </form>
+    <div id="fallback-picker" hidden>
+      <p>Couldn't find that address. Pick an area instead:</p>
+      <select id="area-select" aria-label="Choose an area"></select>
+    </div>
+    <p id="search-status" role="status" aria-live="polite"></p>
+  </section>
+  <div class="finder-layout">
+    <div id="map" class="map" role="application" aria-label="Map of cooling centers and hospitals"></div>
+    <section id="results" class="results" aria-label="Nearest locations"></section>
+  </div>
+</main>
+<footer class="site-footer">
+  <p id="freshness"></p>
+  <p>Data: DC HSEMA · Virginia Dept. of Health / 211 Virginia · Maryland county sources ·
+     HHS/CMS hospital data · U.S. Census Bureau (CRE-Heat &amp; LACE, experimental data products).
+     <a href="https://github.com/brockwebb/CoolSpot">Source &amp; methodology</a></p>
+</footer>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script type="module" src="js/finder.js"></script>
+</body>
+</html>
