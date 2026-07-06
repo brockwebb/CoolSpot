@@ -1,5 +1,5 @@
 // finder.js — address search -> nearest cooling centers + hospitals.
-import { loadJSON, initMap, haversineKm, fmtKmMiles, directionsUrl, geocodeAddress, esc, renderFreshness } from "./common.js";
+import { loadJSON, initMap, haversineKm, fmtKmMiles, directionsUrl, geocodeAddress, esc, renderFreshness, renderKnownLimitations } from "./common.js";
 
 const state = { map: null, cfg: null, centers: [], hospitals: [], markers: L.layerGroup(), youMarker: null };
 
@@ -19,6 +19,7 @@ async function boot() {
   state.map = initMap("map", cfg);
   state.markers.addTo(state.map);
   renderFreshness(manifest);
+  renderKnownLimitations();
   const sel = document.getElementById("area-select");
   sel.append(new Option("Choose an area…", ""));
   cfg.fallback_areas.forEach((a, i) => sel.append(new Option(a.label, String(i))));

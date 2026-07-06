@@ -26,6 +26,24 @@ test("analysis view renders choropleth and legend", async ({ page }) => {
   await expect(page.locator("#freshness")).toContainText("centers", { timeout: 10000 });
 });
 
+test("known-limitations jump button links to a populated section", async ({ page }) => {
+  await page.goto("/");
+  const btn = page.locator("a.jump-btn");
+  await expect(btn).toHaveAttribute("href", "#known-limitations");
+  // JS replaces the fallback <li> with the shared caveats list.
+  await expect(page.locator("#known-limitations-list li")).toHaveCount(7, { timeout: 10000 });
+  await expect(page.locator("#known-limitations")).toContainText("Baltimore County");
+  await btn.click();
+  await expect(page).toHaveURL(/#known-limitations$/);
+  await expect(page.locator("#known-limitations")).toBeInViewport();
+});
+
+test("analysis view also shows the known-limitations section", async ({ page }) => {
+  await page.goto("/analysis.html");
+  await expect(page.locator("a.jump-btn")).toHaveAttribute("href", "#known-limitations");
+  await expect(page.locator("#known-limitations-list li")).toHaveCount(7, { timeout: 15000 });
+});
+
 test("analysis view layer switch is interactive and performant", async ({ page }) => {
   const loadStart = Date.now();
   await page.goto("/analysis.html");

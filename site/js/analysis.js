@@ -1,5 +1,5 @@
 // analysis.js — tract choropleths + cooling-center overlay + coverage gaps.
-import { loadJSON, initMap, esc, renderFreshness } from "./common.js";
+import { loadJSON, initMap, esc, renderFreshness, renderKnownLimitations } from "./common.js";
 
 const LAYERS = {
   pred3_pe:      { label: "% with 3+ heat-vulnerability factors (CRE-Heat 2022, experimental)", fmt: (v) => `${v}%`, stops: [5, 10, 15, 25, 40] },
@@ -76,6 +76,7 @@ async function boot() {
   ]);
   state.cfg = cfg;
   renderFreshness(manifest);
+  renderKnownLimitations();
   state.map = initMap("map", cfg);
   state.tracts = { type: "FeatureCollection", features: [...dc.features, ...md.features, ...va.features] };
   state.tractLayer = L.geoJSON(state.tracts, { style: styleFeature, onEachFeature: onEachTract }).addTo(state.map);

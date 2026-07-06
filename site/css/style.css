@@ -61,6 +61,23 @@ a:focus, button:focus, input:focus, select:focus {
   margin: 0 0 0.75rem;
 }
 
+.jump-btn {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-amber);
+  background: var(--color-amber-bg);
+  border: 1px solid var(--color-amber);
+  border-radius: 4px;
+  padding: 0.3rem 0.7rem;
+  text-decoration: none;
+  margin: 0 0 0.75rem;
+}
+
+.jump-btn:hover {
+  text-decoration: underline;
+}
+
 .site-header nav a {
   color: var(--color-ink);
   text-decoration: none;
@@ -195,6 +212,40 @@ main {
   height: 14px;
   border-radius: 2px;
   display: inline-block;
+}
+
+.known-limitations {
+  padding: 1rem;
+  margin: 0.5rem 1rem 0;
+  border: 1px solid var(--color-amber);
+  border-radius: 6px;
+  background: var(--color-amber-bg);
+}
+
+.known-limitations h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--color-amber);
+}
+
+.known-limitations > p {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+}
+
+.known-limitations ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.known-limitations li {
+  margin: 0.45rem 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.known-limitations:focus {
+  outline: none;
 }
 
 .site-footer {
