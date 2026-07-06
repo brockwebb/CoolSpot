@@ -26,6 +26,10 @@ def test_match_key_strips_place_suffixes_and_punct_keeps_county():
     assert match_key("St. Charles CDP") == "st charles"
 
 
+def test_match_key_strips_typographic_apostrophe():
+    assert match_key("O’Brien CDP") == "obrien"
+
+
 def test_display_name():
     assert display_name("Suitland CDP", "MD", is_county=False) == "Suitland, MD"
     assert display_name("Prince George's County", "MD", is_county=True) == "Prince George's County, MD"
@@ -56,3 +60,23 @@ def test_build_places_empty_raises():
     import pytest
     with pytest.raises(RuntimeError, match="0 places"):
         build_places([], [])
+
+
+def test_published_places_json_normalization_parity():
+    # Invariant: every "q" in the committed site/data/places.json must live in the charset
+    # {a-z, 0-9, space, hyphen} — the charset on which the pipeline's match_key (Python) and
+    # the client's normPlace (JS) provably agree. If a future gazetteer entry produces a "q"
+    # outside this charset, the two normalizers could silently diverge and break place search.
+    import json
+    import re
+
+    from pipeline.config import PROJECT_ROOT
+
+    path = PROJECT_ROOT / "site" / "data" / "places.json"
+    places = json.loads(path.read_text())
+    assert places, "places.json is empty"
+    charset = re.compile(r"^[a-z0-9 -]+$")
+    expected_keys = {"q", "display", "state", "lat", "lon"}
+    for entry in places:
+        assert charset.match(entry["q"]), f"q outside normalization-parity charset: {entry['q']!r}"
+        assert set(entry.keys()) == expected_keys, f"unexpected keys: {entry.keys()!r}"

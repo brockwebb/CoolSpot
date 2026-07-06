@@ -42,6 +42,7 @@ function normPlace(s) {
 
 function matchPlaces(input, places) {
   let q = normPlace(input);
+  q = q.replace(/\s\d{5}(-\d{4})?$/, "").trim();      // tolerate a trailing ZIP/ZIP+4 the geocoder missed on
   let stateFilter = null;
   for (const [tok, st] of Object.entries(STATE_TOKENS).sort((a, b) => b[0].length - a[0].length)) {
     if (q === tok) return [];                       // a bare state is not a place query
@@ -90,6 +91,7 @@ async function onSearch(ev) {
     const hit = await geocodeAddress(q);
     if (hit) { showNearest(hit.lat, hit.lon, `Results near ${hit.matched}`); return; }
   } catch (err) {
+    console.warn(`geocoder unavailable: ${err.message}`);
     geocoderDown = true;
   }
   if (hasDigit && handlePlaceMatches(matchPlaces(q, state.places))) return;

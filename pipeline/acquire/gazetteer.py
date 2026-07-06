@@ -48,7 +48,7 @@ def parse_gazetteer(text: str, states: set[str]) -> list[dict]:
 
 
 def match_key(name: str) -> str:
-    q = name.lower().replace("'", "").replace("'", "").replace(".", "")
+    q = name.lower().replace("'", "").replace("’", "").replace(".", "")
     q = " ".join(q.split())
     for s in SUFFIXES:
         if q.endswith(" " + s):

@@ -144,6 +144,20 @@ test("ambiguous place shows pick-one buttons", async ({ page }) => {
   await page.locator("#place-choices button").first().click();
   await expect(page.locator("#search-status")).toContainText("place center");
   await expect(page.locator(".result-card").first()).toBeVisible();
+
+  // a subsequent unambiguous search must clear the leftover choice chips
+  await page.fill("#address-input", "suitland md");
+  await page.click('#address-form button[type="submit"]');
+  await expect(page.locator("#place-choices")).toBeHidden();
+});
+
+test("place-name search: suitland md 20746 tolerates a trailing ZIP after the geocoder misses", async ({ page }) => {
+  await page.goto("/");
+  await page.fill("#address-input", "suitland md 20746");
+  await page.click('#address-form button[type="submit"]');
+  await expect(page.locator("#search-status")).toContainText("Suitland, MD", { timeout: 15000 });
+  await expect(page.locator("#search-status")).toContainText("place center");
+  await expect(page.locator(".result-card").first()).toBeVisible();
 });
 
 test("gibberish still reaches the area picker", async ({ page }) => {
