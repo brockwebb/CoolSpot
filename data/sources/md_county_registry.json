@@ -37,7 +37,8 @@
       "https://www.baltimorecountymd.gov/departments/health",
       "https://www.baltimorecountymd.gov/departments/health/hot-weather"
     ],
-    "retrieved_date": "2026-07-05"
+    "retrieved_date": "2026-07-05",
+    "review_note": "2026-07-05: county page (baltimorecountymd.gov hot-weather) has no scrapeable per-center addresses (category links/phones only); per-county parser dropped in Task 10, fixture retained at tests/fixtures/md_baltimore_county.html"
   },
   {
     "county": "Calvert County",

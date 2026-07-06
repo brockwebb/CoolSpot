@@ -34,3 +34,104 @@ def test_unknown_county_raises():
 
 def test_all_configured_counties_have_parsers():
     assert set(COUNTY_PARSERS) >= set(CASES)
+
+
+def test_anne_arundel_parser_warns_on_unparseable_name_addr(capsys):
+    """Test that Anne Arundel parser prints warning for malformed location lines."""
+    # Minimal synthetic HTML: one well-formed facility with valid location link,
+    # one with a malformed location link missing the expected "name: address" format.
+    html = """
+    <div class="paragraph paragraph--type--heading">Heading</div>
+    <div class="paragraph paragraph--type--text-editor">Operating Days & Hours: M-F 9-5</div>
+    <div class="paragraph paragraph--type--text-editor">
+      <a class="icon-link-location">Valid Center: 100 Main St, Annapolis</a>
+      <a class="icon-link-location">Malformed Line With No Colon</a>
+    </div>
+    """
+    recs = parse_county("anne_arundel", html, "2026-07-05", "https://example.gov/aa")
+    # Well-formed record should parse.
+    assert len(recs) >= 1
+    # Warning should appear in output.
+    captured = capsys.readouterr()
+    assert "skipped unparseable" in captured.out
+    assert "md_counties[anne_arundel]" in captured.out
+
+
+def test_anne_arundel_parser_warns_on_unparseable_address(capsys):
+    """Test that Anne Arundel parser warns when address regex fails."""
+    html = """
+    <div class="paragraph paragraph--type--heading">Heading</div>
+    <div class="paragraph paragraph--type--text-editor">Operating Days & Hours: M-F 9-5</div>
+    <div class="paragraph paragraph--type--text-editor">
+      <a class="icon-link-location">Valid Center: 100 Main St, Annapolis</a>
+      <a class="icon-link-location">Bad Address: XYZ</a>
+    </div>
+    """
+    recs = parse_county("anne_arundel", html, "2026-07-05", "https://example.gov/aa")
+    # Well-formed record should parse.
+    assert len(recs) >= 1
+    # Warning should appear in output.
+    captured = capsys.readouterr()
+    assert "skipped unparseable" in captured.out
+    assert "md_counties[anne_arundel]" in captured.out
+
+
+def test_howard_parser_warns_on_unparseable_address(capsys):
+    """Test that Howard parser warns when address regex fails."""
+    html = """
+    <ul type="disc">
+      <li>
+        <strong>Valid Center</strong>
+        <ul>
+          <li>Address: 100 Main St, Ellicott City, MD 21043</li>
+          <li>Phone Numbers: 410-123-4567</li>
+          <li>Hours of Operation: M-F 9-5</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Unparseable Center</strong>
+        <ul>
+          <li>Address: XYZ</li>
+          <li>Phone Numbers: 410-987-6543</li>
+          <li>Hours of Operation: M-F 9-5</li>
+        </ul>
+      </li>
+    </ul>
+    """
+    recs = parse_county("howard", html, "2026-07-05", "https://example.gov/howard")
+    # Well-formed record should parse.
+    assert len(recs) >= 1
+    # Warning should appear in output.
+    captured = capsys.readouterr()
+    assert "skipped unparseable" in captured.out
+    assert "md_counties[howard]" in captured.out
+
+
+def test_howard_parser_warns_on_missing_address(capsys):
+    """Test that Howard parser warns when address field is absent."""
+    html = """
+    <ul type="disc">
+      <li>
+        <strong>Valid Center</strong>
+        <ul>
+          <li>Address: 100 Main St, Ellicott City, MD 21043</li>
+          <li>Phone Numbers: 410-123-4567</li>
+          <li>Hours of Operation: M-F 9-5</li>
+        </ul>
+      </li>
+      <li>
+        <strong>No Address Center</strong>
+        <ul>
+          <li>Phone Numbers: 410-987-6543</li>
+          <li>Hours of Operation: M-F 9-5</li>
+        </ul>
+      </li>
+    </ul>
+    """
+    recs = parse_county("howard", html, "2026-07-05", "https://example.gov/howard")
+    # Well-formed record should parse.
+    assert len(recs) >= 1
+    # Warning should appear in output.
+    captured = capsys.readouterr()
+    assert "skipped unparseable" in captured.out
+    assert "md_counties[howard]" in captured.out

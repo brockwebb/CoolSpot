@@ -71,12 +71,14 @@ def _parse_anne_arundel(soup: BeautifulSoup, retrieved_date: str, source_url: st
             text = a.get_text(strip=True)
             m = AA_NAME_ADDR_RE.match(text)
             if not m:
+                print(f"!! md_counties[anne_arundel]: skipped unparseable candidate: {text[:80]!r}")
                 continue
             name, addr = m.group("name").strip(), m.group("addr").strip()
             # append the state literal ADDR_LINE_RE expects; AA's own page
             # text omits "MD" since it's implied by the county context.
             am = ADDR_LINE_RE.search(addr + ", MD")
             if not am:
+                print(f"!! md_counties[anne_arundel]: skipped unparseable candidate: {(text + ' → ' + addr)[:80]!r}")
                 continue
             recs.append(make_record(
                 "anne_arundel", name, am.group("street"), am.group("city"), am.group("zip") or "",
@@ -109,9 +111,11 @@ def _parse_howard(soup: BeautifulSoup, retrieved_date: str, source_url: str) -> 
             elif label.lower().startswith("hours"):
                 hours_text = re.sub(r"^Hours of Operation:?\s*", "", label, flags=re.IGNORECASE)
         if not addr_text:
+            print(f"!! md_counties[howard]: skipped unparseable candidate: {name[:80]!r} (no address found)")
             continue
         am = HOWARD_ADDR_RE.search(addr_text)
         if not am:
+            print(f"!! md_counties[howard]: skipped unparseable candidate: {addr_text[:80]!r}")
             continue
         recs.append(make_record(
             "howard", name, am.group("street"), am.group("city"), am.group("zip") or "",

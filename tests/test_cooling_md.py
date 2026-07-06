@@ -53,3 +53,68 @@ def test_parse_hub_fixture_county_count():
 
 def test_clean_text_strips_zero_width_and_nbsp():
     assert clean_text("​​Garrett\xa0County​") == "Garrett County"
+
+
+def test_write_registry_preserves_review_notes(tmp_path):
+    """Test that write_registry preserves review_note fields from existing entries."""
+    from pipeline.acquire.cooling.md import write_registry
+    import json
+
+    reg_path = tmp_path / "registry.json"
+
+    # Write initial registry with a review_note on Baltimore County.
+    initial_entries = [
+        {
+            "county": "Baltimore County",
+            "phone": "410-887-2243",
+            "links": ["https://example.gov/baltimore"],
+            "retrieved_date": "2026-07-05",
+            "review_note": "test review note"
+        },
+        {
+            "county": "Anne Arundel County",
+            "phone": "410-768-5522",
+            "links": ["https://example.gov/aa"],
+            "retrieved_date": "2026-07-05"
+        }
+    ]
+    write_registry(initial_entries, reg_path)
+
+    # Verify the note was written.
+    data = json.loads(reg_path.read_text())
+    assert data[0]["review_note"] == "test review note"
+
+    # Regenerate registry with fresh data (no review_note in new entries).
+    fresh_entries = [
+        {
+            "county": "Baltimore County",
+            "phone": "410-887-2243",
+            "links": ["https://example.gov/baltimore-new"],
+            "retrieved_date": "2026-07-06"
+        },
+        {
+            "county": "Anne Arundel County",
+            "phone": "410-768-5522",
+            "links": ["https://example.gov/aa-new"],
+            "retrieved_date": "2026-07-06"
+        },
+        {
+            "county": "Caroline County",
+            "phone": "410-479-2222",
+            "links": ["https://example.gov/caroline"],
+            "retrieved_date": "2026-07-06"
+        }
+    ]
+    write_registry(fresh_entries, reg_path)
+
+    # Verify the review_note on Baltimore County survived the regeneration.
+    data = json.loads(reg_path.read_text())
+    baltimore = [e for e in data if e["county"] == "Baltimore County"]
+    assert len(baltimore) == 1
+    assert baltimore[0]["review_note"] == "test review note"
+    assert baltimore[0]["links"][0] == "https://example.gov/baltimore-new"
+
+    # Anne Arundel should still have no review_note.
+    aa = [e for e in data if e["county"] == "Anne Arundel County"]
+    assert len(aa) == 1
+    assert "review_note" not in aa[0]

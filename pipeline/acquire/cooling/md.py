@@ -95,5 +95,21 @@ def parse_hub(html: str, retrieved_date: str) -> list[dict]:
 
 def write_registry(entries: list[dict], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # Preserve review_note fields from existing registry if it exists.
+    existing_notes = {}
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text())
+            for entry in existing:
+                county = entry.get("county")
+                if county and "review_note" in entry:
+                    existing_notes[county] = entry["review_note"]
+        except (json.JSONDecodeError, IOError):
+            pass
+    # Carry over review_note fields to matching counties in new entries.
+    for entry in entries:
+        county = entry.get("county")
+        if county in existing_notes:
+            entry["review_note"] = existing_notes[county]
     path.write_text(json.dumps(entries, indent=2))
     print(f"wrote MD county registry: {path} ({len(entries)} counties)")
