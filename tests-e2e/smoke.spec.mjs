@@ -118,3 +118,37 @@ test("tract click opens popup and fills slim bar with county name", async ({ pag
   await expect(page.locator(".leaflet-popup-content h3").first()).toContainText(/Census Tract .+ — .*(County|city|District of Columbia)/);
   await expect(page.locator("#tract-info h3")).toContainText(/County|city|District of Columbia/);
 });
+
+test("place-name search: suitland md resolves locally", async ({ page }) => {
+  await page.goto("/");
+  await page.fill("#address-input", "suitland md");
+  await page.click('#address-form button[type="submit"]');
+  await expect(page.locator("#search-status")).toContainText("Suitland, MD");
+  await expect(page.locator("#search-status")).toContainText("place center");
+  await expect(page.locator(".result-card").first()).toBeVisible();
+});
+
+test("ambiguous place shows pick-one buttons", async ({ page }) => {
+  await page.goto("/");
+  // discover a genuinely ambiguous q from the shipped index (data-driven, not hardcoded)
+  const amb = await page.evaluate(async () => {
+    const places = await (await fetch("data/places.json")).json();
+    const byQ = {};
+    for (const p of places) (byQ[p.q] ??= []).push(p);
+    return Object.keys(byQ).find((q) => new Set(byQ[q].map((p) => p.state)).size >= 2) ?? null;
+  });
+  test.skip(amb === null, "no cross-state ambiguous place in index");
+  await page.fill("#address-input", amb);
+  await page.click('#address-form button[type="submit"]');
+  await expect(page.locator("#place-choices button").first()).toBeVisible();
+  await page.locator("#place-choices button").first().click();
+  await expect(page.locator("#search-status")).toContainText("place center");
+  await expect(page.locator(".result-card").first()).toBeVisible();
+});
+
+test("gibberish still reaches the area picker", async ({ page }) => {
+  await page.goto("/");
+  await page.fill("#address-input", "zzqx nowhere");
+  await page.click('#address-form button[type="submit"]');
+  await expect(page.locator("#fallback-picker")).toBeVisible({ timeout: 15000 });
+});
