@@ -93,6 +93,7 @@ def run(cfg: dict) -> None:
         "nearest_n": cfg["publish"]["nearest_n"],
         "nearest_hospitals": cfg["publish"]["nearest_hospitals"],
         "gap_distance_km": cfg["publish"]["gap_distance_km"],
+        "gap_min_affected": cfg["publish"]["gap_min_affected"],
         "map_center": cfg["publish"]["map_center"],
         "map_zoom": cfg["publish"]["map_zoom"],
         "fallback_areas": cfg["publish"]["fallback_areas"],

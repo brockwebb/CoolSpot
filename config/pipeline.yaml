@@ -51,6 +51,7 @@ publish:
   nearest_n: 10
   nearest_hospitals: 3
   gap_distance_km: 8.0
+  gap_min_affected: 1500   # underserved = >=gap_distance_km AND >=this many people with 3+ heat factors (round number; 4% of tracts)
   request_timeout_s: 60
   map_center: [38.6, -77.6]
   map_zoom: 7

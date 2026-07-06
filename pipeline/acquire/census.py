@@ -132,6 +132,8 @@ def acs_attrs(detailed: dict, subject: dict) -> dict:
         "pct_poverty": _pct(_acs_int(detailed, "B17001_002E"), _acs_int(detailed, "B17001_001E")),
         "pct_no_vehicle": _pct(_acs_int(detailed, "B08201_002E"), _acs_int(detailed, "B08201_001E")),
         "pct_disability": _pct(_acs_int(subject, "S1810_C02_001E"), _acs_int(subject, "S1810_C01_001E")),
+        "pov_below_e": _acs_int(detailed, "B17001_002E"),
+        "disability_e": _acs_int(subject, "S1810_C02_001E"),
     }
 
 
