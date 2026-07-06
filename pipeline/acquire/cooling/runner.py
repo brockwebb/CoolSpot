@@ -15,15 +15,15 @@ PENDING_PATH = PROJECT_ROOT / "data" / "raw" / "cooling_centers_pending.json"
 QUARANTINE_DIR = PROJECT_ROOT / "data" / "quarantine"
 
 
-def _fetch_dc(cfg, timeout, retrieved):
+def _fetch_dc(cfg: dict, timeout: int, retrieved: str) -> list[dict]:
     return dc.parse(dc.fetch(cfg, timeout), retrieved, cfg["cooling_sources"]["dc"]["source_page"])
 
 
-def _fetch_va(cfg, timeout, retrieved):
+def _fetch_va(cfg: dict, timeout: int, retrieved: str) -> list[dict]:
     return va.parse(va.fetch(cfg, timeout), retrieved, cfg["cooling_sources"]["va"]["source_page"])
 
 
-def _fetch_md(cfg, timeout, retrieved):
+def _fetch_md(cfg: dict, timeout: int, retrieved: str) -> list[dict]:
     recs = md.parse_pg(md.fetch_pg(cfg, timeout), retrieved)
     registry = md.parse_hub(md.fetch_hub(cfg, timeout), retrieved)
     md.write_registry(registry, PROJECT_ROOT / "data" / "sources" / "md_county_registry.json")
