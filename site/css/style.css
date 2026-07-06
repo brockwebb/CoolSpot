@@ -78,7 +78,7 @@ a:focus, button:focus, input:focus, select:focus {
   text-decoration: underline;
 }
 
-.site-header nav a {
+.site-header nav:not(.seg-nav) a {
   color: var(--color-ink);
   text-decoration: none;
   font-weight: 600;

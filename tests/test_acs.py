@@ -53,3 +53,9 @@ def test_count_numerator_sentinel_gives_none():
     det = {**acs_rows_to_dict(DETAILED)["24033802405"], "B17001_002E": "-666666666"}
     sub = acs_rows_to_dict(SUBJECT)["24033802405"]
     assert acs_attrs(det, sub)["pov_below_e"] is None
+
+
+def test_disability_sentinel_gives_none():
+    det = acs_rows_to_dict(DETAILED)["24033802405"]
+    sub = {**acs_rows_to_dict(SUBJECT)["24033802405"], "S1810_C02_001E": "-666666666"}
+    assert acs_attrs(det, sub)["disability_e"] is None

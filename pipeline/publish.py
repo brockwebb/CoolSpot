@@ -60,6 +60,19 @@ def jurisdiction_summary(records: list[dict]) -> dict[str, dict]:
     return juris
 
 
+def site_config_payload(cfg: dict) -> dict:
+    """Build the site_config.json payload from the publish config section."""
+    return {
+        "nearest_n": cfg["publish"]["nearest_n"],
+        "nearest_hospitals": cfg["publish"]["nearest_hospitals"],
+        "gap_distance_km": cfg["publish"]["gap_distance_km"],
+        "gap_min_affected": cfg["publish"]["gap_min_affected"],
+        "map_center": cfg["publish"]["map_center"],
+        "map_zoom": cfg["publish"]["map_zoom"],
+        "fallback_areas": cfg["publish"]["fallback_areas"],
+    }
+
+
 def run(cfg: dict) -> None:
     out_dir = PROJECT_ROOT / cfg["publish"]["site_data_dir"]
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -89,13 +102,5 @@ def run(cfg: dict) -> None:
                       "roster_note": "coordinate roster frozen May 2024; attributes current via CMS"},
     }, indent=2))
 
-    (out_dir / "site_config.json").write_text(json.dumps({
-        "nearest_n": cfg["publish"]["nearest_n"],
-        "nearest_hospitals": cfg["publish"]["nearest_hospitals"],
-        "gap_distance_km": cfg["publish"]["gap_distance_km"],
-        "gap_min_affected": cfg["publish"]["gap_min_affected"],
-        "map_center": cfg["publish"]["map_center"],
-        "map_zoom": cfg["publish"]["map_zoom"],
-        "fallback_areas": cfg["publish"]["fallback_areas"],
-    }, indent=2))
+    (out_dir / "site_config.json").write_text(json.dumps(site_config_payload(cfg), indent=2))
     print("wrote manifest.json and site_config.json")

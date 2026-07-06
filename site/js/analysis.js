@@ -29,6 +29,7 @@ const LAYERS = {
     count: { value: (p) => p.disability_e,   label: "People with a disability (ACS 2020–2024)", fmt: fmtCount, stops: [250, 500, 750, 1000, 1500] },
   },
   distance: {
+    // 'pct' slot holds the only form (km); no count form exists — activeForm() falls back here.
     pct:   { value: (p) => p.nearest_cc_km, label: "Distance to nearest cooling center", fmt: fmtKm, stops: [2, 5, 10, 20, 35] },
     count: null, // no count form; the mode toggle is disabled on this layer
   },
