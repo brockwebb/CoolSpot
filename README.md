@@ -5,7 +5,7 @@ centers and hospitals near an address, and provides a Census-tract-level map of 
 and air-conditioning access, to help residents find cooling during extreme heat events.
 
 It ships as a static site (vanilla JS + Leaflet, no server, no build step) fed by an offline Python
-data pipeline. Deploys to: **https://brockwebb.github.io/CoolSpot/** (first deployment pending)
+data pipeline. Live at: **https://brockwebb.github.io/CoolSpot/**
 
 > **Screenshot:** TODO — capture a screenshot of the finder view once the site is live at the URL
 > above and embed it here (e.g. `docs/design/screenshot-finder.png`).
