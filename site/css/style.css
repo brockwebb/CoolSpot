@@ -130,6 +130,90 @@ a:focus, button:focus, input:focus, select:focus {
   opacity: 0.45;
 }
 
+.control-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.layer-control {
+  position: relative;
+}
+
+.layer-control select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.analysis-toggles {
+  position: relative;
+  margin-top: 0;
+}
+
+.analysis-toggles label {
+  display: inline-block;
+  margin: 0 0.9rem 0 0;
+}
+
+.control-bar details.help[open] {
+  position: absolute;
+  z-index: 1100;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  max-width: 26rem;
+}
+
+.legend-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.9rem;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.legend-bar .legend-title {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.legend-bar .legend-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tract-bar {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.8rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.tract-bar h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.tract-bar ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.muted {
+  color: var(--color-gray);
+  font-size: 0.8rem;
+}
+
 details.help {
   display: inline-block;
   font-size: 0.85rem;
@@ -189,20 +273,6 @@ main {
   cursor: pointer;
 }
 
-#layer-picker {
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-}
-
-#layer-picker label, .analysis-toggles label {
-  display: block;
-  margin: 0.35rem 0;
-}
-
-.analysis-toggles {
-  margin-top: 0.5rem;
-}
-
 .finder-layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -255,21 +325,6 @@ main {
   text-decoration: none;
   border-radius: 4px;
   font-size: 0.85rem;
-}
-
-#legend {
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 0.5rem 0.8rem;
-  margin-bottom: 0.6rem;
-}
-
-#legend .swatch-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  margin: 0.15rem 0;
 }
 
 #legend .swatch {

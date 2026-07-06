@@ -21,7 +21,7 @@ test("fallback area search renders results", async ({ page }) => {
 test("analysis view renders choropleth and legend", async ({ page }) => {
   await page.goto("/analysis.html");
   await expect(page.locator("#legend .legend-row").first()).toBeVisible({ timeout: 15000 });
-  await expect(page.locator("#legend h3")).toContainText("CRE-Heat");
+  await expect(page.locator("#legend .legend-title")).toContainText("CRE-Heat");
   await expect(page.locator("#map path.leaflet-interactive").first()).toBeAttached({ timeout: 15000 });
   await expect(page.locator("#freshness")).toContainText("centers", { timeout: 10000 });
 });
@@ -51,8 +51,8 @@ test("analysis view layer switch is interactive and performant", async ({ page }
   const loadToLegendMs = Date.now() - loadStart;
 
   const switchStart = Date.now();
-  await page.locator('#layer-picker input[value="no_ac"]').click();
-  await expect(page.locator("#legend h3")).toContainText("without air conditioning");
+  await page.selectOption("#layer-select", "no_ac");
+  await expect(page.locator("#legend .legend-title")).toContainText("without air conditioning");
   const layerSwitchMs = Date.now() - switchStart;
 
   console.log(`[perf] load-to-legend: ${loadToLegendMs}ms, layer-switch: ${layerSwitchMs}ms`);
@@ -63,19 +63,19 @@ test("analysis view layer switch is interactive and performant", async ({ page }
 
 test("percent/count toggle flips legend to separator counts", async ({ page }) => {
   await page.goto("/analysis.html");
-  await expect(page.locator("#legend h3")).toContainText("% with 3+", { timeout: 15000 });
+  await expect(page.locator("#legend .legend-title")).toContainText("% with 3+", { timeout: 15000 });
   await page.locator('#show-as input[value="count"]').click();
-  await expect(page.locator("#legend h3")).toContainText("People with 3+");
+  await expect(page.locator("#legend .legend-title")).toContainText("People with 3+");
   await expect(page.locator("#legend .legend-row").nth(3)).toContainText("1,000"); // separator, round stop
 });
 
 test("distance layer disables the mode toggle", async ({ page }) => {
   await page.goto("/analysis.html");
   await expect(page.locator("#legend .legend-row").first()).toBeVisible({ timeout: 15000 });
-  await page.locator('#layer-picker input[value="distance"]').click();
+  await page.selectOption("#layer-select", "distance");
   await expect(page.locator('#show-as input[value="count"]')).toBeDisabled();
   await expect(page.locator("#show-as")).toHaveClass(/dimmed/);
-  await page.locator('#layer-picker input[value="heat"]').click();
+  await page.selectOption("#layer-select", "heat");
   await expect(page.locator('#show-as input[value="count"]')).toBeEnabled();
 });
 
@@ -95,4 +95,26 @@ test("segmented nav on both pages with correct active side", async ({ page }) =>
   await expect(page.locator('.seg-nav a[aria-current="page"]')).toHaveText("Find cooling centers");
   await page.goto("/analysis.html");
   await expect(page.locator('.seg-nav a[aria-current="page"]')).toHaveText("Heat vulnerability map");
+});
+
+test("legend renders as a horizontal bar above the map", async ({ page }) => {
+  await page.goto("/analysis.html");
+  await expect(page.locator("#legend .legend-title")).toBeVisible({ timeout: 15000 });
+  const order = await page.evaluate(() => {
+    const legend = document.getElementById("legend");
+    const map = document.getElementById("map");
+    return !!(legend.compareDocumentPosition(map) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  expect(order).toBe(true); // legend precedes map in DOM
+});
+
+test("tract click opens popup and fills slim bar with county name", async ({ page }) => {
+  await page.goto("/analysis.html");
+  await expect(page.locator("#legend .legend-title")).toBeVisible({ timeout: 15000 });
+  // Hide cooling-center markers first — they share the overlay pane with tract polygons and
+  // can sit visually on top of a tiny/sliver tract path, stealing the click.
+  await page.locator("#show-centers").uncheck();
+  await page.locator("#map path.leaflet-interactive").first().click({ force: true });
+  await expect(page.locator(".leaflet-popup-content h3").first()).toContainText(/Census Tract|Tract/);
+  await expect(page.locator("#tract-info h3")).toContainText(/County|city|District of Columbia/);
 });
