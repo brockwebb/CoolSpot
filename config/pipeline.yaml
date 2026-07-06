@@ -1,0 +1,49 @@
+states:
+  - {fips: "11", abbr: DC, name: District of Columbia}
+  - {fips: "24", abbr: MD, name: Maryland}
+  - {fips: "51", abbr: VA, name: Virginia}
+
+census:
+  cre_heat_tract_url: "https://www2.census.gov/programs-surveys/demo/datasets/community-resilience/2022/heat/CRE22_Heat_Tract.csv"
+  lace_tract_url: "https://www2.census.gov/programs-surveys/demo/datasets/lace/2023/LACE_23_Tract.csv"
+  acs:
+    detailed_endpoint: "https://api.census.gov/data/2024/acs/acs5"
+    subject_endpoint: "https://api.census.gov/data/2024/acs/acs5/subject"
+    detailed_vars: [B01003_001E, B09021_022E, B09021_023E, B17001_001E, B17001_002E, B08201_001E, B08201_002E]
+    subject_vars: [S1810_C01_001E, S1810_C02_001E, S0101_C01_030E]
+  boundaries_url_template: "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_{fips}_tract_500k.zip"
+
+geocoder:
+  batch_url: "https://geocoding.geo.census.gov/geocoder/locations/addressbatch"
+  benchmark: "Public_AR_Current"
+
+hospitals:
+  healthdata_url: "https://healthdata.gov/resource/anag-cw7u.json"
+  cms_url: "https://data.cms.gov/provider-data/api/1/datastore/query/xubh-q36u/0"
+  cms_page_size: 2000
+
+cooling_sources:
+  dc:
+    arcgis_query_url: "https://services.arcgis.com/neT9SoYxizqTHZPH/arcgis/rest/services/DC_Cooling_Centers_View/FeatureServer/1/query"
+    source_page: "https://opendata.dc.gov/datasets/9ee42555df88442fb357d77147bfdca3"
+  va:
+    wpsl_url: "https://www.vdh.virginia.gov/environmental-public-health-tracking/wp-admin/admin-ajax.php"
+    source_page: "https://www.vdh.virginia.gov/environmental-public-health-tracking/climate-weather/cooling-centers/"
+    sweep_points: [[38.90, -77.30], [37.55, -77.45], [36.85, -76.30], [37.00, -80.70]]
+    search_radius_miles: 500
+    max_results: 500
+  md:
+    hub_url: "https://health.maryland.gov/preparedness/Pages/Cooling-Centers-Contact-List-2026.aspx"
+    pg_arcgis_query_url: "https://gis.princegeorgescountymd.gov/arcgis/rest/services/EOC/COOLINGCENTERS/MapServer/0/query"
+    county_pages:
+      baltimore_county: "https://www.baltimorecountymd.gov/departments/health/hot-weather"
+      anne_arundel: "https://www.aacounty.org/emergency-management/cooling-relief"
+      howard: "https://www.howardcountymd.gov/community-sustainability/warming-and-cooling-center-information"
+
+publish:
+  site_data_dir: "site/data"
+  coord_precision: 5
+  min_geoid_match_rate: 0.99
+  nearest_n: 10
+  gap_distance_km: 8.0
+  request_timeout_s: 60

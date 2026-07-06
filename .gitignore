@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+data/raw/
+data/quarantine/
+cc_tasks/
+handoffs/
+node_modules/
+test-results/
+.pytest_cache/
+*.egg-info/
