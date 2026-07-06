@@ -85,7 +85,7 @@ A gap tract = **far from cooling AND many affected people**:
 nearest_cc_km ≥ gap_distance_km   AND   pred3_e ≥ gap_min_affected
 ```
 
-- `gap_distance_km: 8` (existing) and `gap_min_affected: 500` (new) — both in
+- `gap_distance_km: 8` (existing) and `gap_min_affected: 1500` (new; data-verified — 500 would highlight 37% of tracts, 1500 highlights a selective 4%) — both in
   `config/pipeline.yaml` under `publish:`, surfaced to the client through `site_config.json`.
   Round numbers per the no-chartjunk rule.
 - Checkbox label becomes **"Highlight underserved tracts"** — plain words for what it now means.
@@ -97,7 +97,7 @@ A reusable, dependency-free pattern: native `<details class="help"><summary>ⓘ<
 inline next to a control. Keyboard/screen-reader accessible by default. Two instances:
 
 1. **Underserved tracts** — exact definition in plain words: "Highlighted tracts are more than
-   8 km from any listed cooling center AND are home to at least 500 people with 3 or more
+   8 km from any listed cooling center AND are home to at least 1,500 people with 3 or more
    heat-vulnerability risk factors (Census CRE-Heat estimate). These are the areas where a new
    cooling center would reach the most vulnerable people." (Values interpolated from
    `site_config.json`, not hardcoded in the string.)
