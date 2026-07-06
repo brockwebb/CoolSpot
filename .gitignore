@@ -1,12 +1,29 @@
+# secrets
 .env
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# python
 __pycache__/
 *.pyc
 .venv/
-data/raw/
-data/quarantine/
-cc_tasks/
-handoffs/
-node_modules/
-test-results/
 .pytest_cache/
 *.egg-info/
+
+# node / playwright
+node_modules/
+test-results/
+playwright-report/
+
+# logs
+*.log
+
+# pipeline working data (published outputs in site/data/ ARE committed)
+data/raw/
+data/quarantine/
+
+# session-local project management
+cc_tasks/
+handoffs/

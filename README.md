@@ -7,18 +7,22 @@ and air-conditioning access, to help residents find cooling during extreme heat 
 It ships as a static site (vanilla JS + Leaflet, no server, no build step) fed by an offline Python
 data pipeline. Live at: **https://brockwebb.github.io/CoolSpot/**
 
-> **Screenshot:** TODO — capture a screenshot of the finder view once the site is live at the URL
-> above and embed it here (e.g. `docs/design/screenshot-finder.png`).
+![CoolSpot finder showing cooling centers near Suitland, MD](docs/design/screenshot-finder.png)
 
 ## What it does
 
-- **Finder** (`index.html`) — enter an address, get the nearest cooling centers and hospitals with
-  directions, phone numbers, and hours (where known). Falls back to a picker of regional anchor
-  towns if geocoding fails or an address can't be matched.
-- **Heat vulnerability map** (`analysis.html`) — a Census-tract choropleth toggling between six
-  layers: CRE-Heat vulnerability, LACE no-AC estimate, poverty rate, 65+ population, disability
-  rate, and distance to the nearest cooling center. Includes a "highlight gap tracts" toggle for
-  tracts that are both far from a cooling center and above a configurable distance threshold.
+- **Finder** (`index.html`) — enter a street address (most precise) or a city/town/county name
+  ("Suitland, MD") and get the nearest cooling centers and hospitals with directions, phone
+  numbers, and hours (where known). Place names resolve instantly against a local Census
+  Gazetteer index — no geocoder round-trip; ambiguous names (a place in more than one state)
+  show a pick-one list. A regional area picker remains as the last-resort fallback.
+- **Heat vulnerability map** (`analysis.html`) — a Census-tract choropleth with six layers
+  (CRE-Heat vulnerability, LACE no-AC estimate, poverty, age 65+, disability, distance to the
+  nearest cooling center), each viewable as **percent of tract or number of people** (real ACS
+  numerators, never derived). Clicking a tract shows its details by tract number and county name.
+  A "highlight underserved tracts" toggle marks tracts that are both far from any cooling center
+  (≥ 8 km) and home to many heat-vulnerable people (≥ 1,500 with 3+ risk factors) — both
+  thresholds config-driven.
 
 ## Data sources
 
@@ -29,6 +33,7 @@ data pipeline. Live at: **https://brockwebb.github.io/CoolSpot/**
 | Census ACS 5-year | Poverty rate, 65+ population, disability rate | Tract, DC/MD/VA | 2020–2024 |
 | Census TIGER/Line | Tract boundaries | DC/MD/VA | 2024 vintage (2020 fallback where 2024 unavailable) |
 | Census Geocoder | Address → lat/lon (finder + batch pipeline) | US-wide | live JSONP |
+| Census Gazetteer | Place/county name → center coordinates (finder place search) | DC/MD/VA (1,414 entries) | 2024 |
 | HHS/CMS Hospital General Information | Hospital roster + emergency-services flag | US-wide | coordinates frozen May 2024; attributes refreshed via CMS |
 | DC HSEMA (ArcGIS Open Data) | Cooling center registry | Washington, DC | retrieved 2026-07-06 |
 | Virginia Dept. of Health / 211 Virginia | Cooling center registry | Virginia (statewide) | retrieved 2026-07-06 |
@@ -88,14 +93,15 @@ All tunables (source URLs, vintages, distance thresholds, geocoder batch size) l
 config/pipeline.yaml           -- all tunables (URLs, vintages, thresholds)
 pipeline/                      -- offline Python pipeline (uv run coolspot <stage>)
   acquire/
-    census.py                 -- CRE-Heat/LACE/ACS acquisition
+    census.py                  -- CRE-Heat/LACE/ACS acquisition
     boundaries.py              -- TIGER/Line tract shapefiles -> attributed GeoJSON
-    hospitals.py                -- HealthData.gov/CMS hospital roster acquisition
+    gazetteer.py               -- Census Gazetteer -> places.json (place-name search index)
+    hospitals.py               -- HealthData.gov/CMS hospital roster acquisition
     cooling/
       dc.py                    -- DC HSEMA ArcGIS adapter
       va.py                    -- Virginia Dept. of Health / 211 Virginia adapter
-      md.py                    -- Prince George's County ArcGIS adapter
-      md_counties.py            -- Anne Arundel / Howard HTML adapters
+      md.py                    -- PG County ArcGIS adapter + MDH hub-page county registry
+      md_counties.py           -- Anne Arundel / Howard HTML adapters
       runner.py                -- fan-out across jurisdiction adapters -> shared schema
   geocode.py                   -- Census batch geocoder client + quarantine
   publish.py                   -- writes site/data/cooling_centers.geojson + manifest.json + site_config.json
