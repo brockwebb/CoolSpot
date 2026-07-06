@@ -15,7 +15,7 @@ def fetch(cfg: dict, timeout: int) -> dict:
     return r.json()
 
 
-def parse(raw: dict, retrieved_date: str) -> list[dict]:
+def parse(raw: dict, retrieved_date: str, source_url: str) -> list[dict]:
     recs = []
     for feat in raw.get("features", []):
         p = feat.get("properties", {})
@@ -39,7 +39,7 @@ def parse(raw: dict, retrieved_date: str) -> list[dict]:
             "url": p.get("USER_Url") or "",
             "status": p.get("USER_Status") or "",
             "notes": f"Open to: {p.get('USER_Open_To')}" if p.get("USER_Open_To") else "",
-            "source_url": "https://opendata.dc.gov/datasets/9ee42555df88442fb357d77147bfdca3",
+            "source_url": source_url,
             "retrieved_date": retrieved_date,
         }
         if coords:

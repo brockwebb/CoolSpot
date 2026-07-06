@@ -25,10 +25,10 @@ def dedupe(rows: list[dict]) -> list[dict]:
     return list(seen.values())
 
 
-def parse(rows: list[dict], retrieved_date: str) -> list[dict]:
+def parse(rows: list[dict], retrieved_date: str, source_url: str) -> list[dict]:
     recs = []
     for row in dedupe(rows):
-        recs.append({
+        rec = {
             "id": f"va-{row.get('id')}",
             "name": (row.get("store") or "").strip(),
             "address": " ".join(x for x in [(row.get("address") or "").strip(), (row.get("address2") or "").strip()] if x),
@@ -36,12 +36,16 @@ def parse(rows: list[dict], retrieved_date: str) -> list[dict]:
             "state": "VA",
             "zip": (row.get("zip") or "").strip(),
             "jurisdiction": "va",
-            "lat": float(row["lat"]),
-            "lon": float(row["lng"]),
             "hours": (row.get("hours") or "").strip(),
             "phone": (row.get("phone") or "").strip(),
             "url": (row.get("url") or "").strip(),
-            "source_url": "https://www.vdh.virginia.gov/environmental-public-health-tracking/climate-weather/cooling-centers/",
+            "source_url": source_url,
             "retrieved_date": retrieved_date,
-        })
+        }
+        try:
+            rec["lat"] = float(row.get("lat"))
+            rec["lon"] = float(row.get("lng"))
+        except (TypeError, ValueError):
+            pass
+        recs.append(rec)
     return recs

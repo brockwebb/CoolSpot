@@ -11,7 +11,8 @@ DC_GEOJSON = {"type": "FeatureCollection", "features": [{
 
 
 def test_parse_dc_maps_fields():
-    recs = parse(DC_GEOJSON, "2026-07-05")
+    source_url = "https://example.gov/dc-source"
+    recs = parse(DC_GEOJSON, "2026-07-05", source_url)
     assert len(recs) == 1
     r = recs[0]
     assert r["id"] == "dc-7"
@@ -20,11 +21,12 @@ def test_parse_dc_maps_fields():
     assert r["city"] == "Washington" and r["state"] == "DC" and r["zip"] == "20001"
     assert r["lat"] == 38.8993 and r["lon"] == -77.0219
     assert r["hours"] == "Mon-Fri: 9AM-5PM" and r["jurisdiction"] == "dc"
+    assert r["source_url"] == source_url
     assert r["retrieved_date"] == "2026-07-05"
 
 
 def test_parse_dc_handles_unsplittable_address():
     feats = dict(DC_GEOJSON)
     feats["features"][0]["properties"]["USER_Address"] = "901 G St NW"
-    r = parse(feats, "2026-07-05")[0]
+    r = parse(feats, "2026-07-05", "https://example.gov/dc-source")[0]
     assert r["address"] == "901 G St NW" and r["city"] == "Washington" and r["state"] == "DC"
