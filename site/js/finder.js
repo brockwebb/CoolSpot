@@ -78,13 +78,21 @@ function showNearest(lat, lon, label) {
     const m = L.marker([it.lat, it.lon]).bindPopup(`<b>${esc(it.name)}</b><br>${esc(it.address)}, ${esc(it.city)}`);
     state.markers.addLayer(m);
   });
-  state.map.fitBounds(L.latLngBounds(all.map((i) => [i.lat, i.lon])).extend([lat, lon]), { padding: [30, 30] });
+  if (all.length) {
+    state.map.fitBounds(L.latLngBounds(all.map((i) => [i.lat, i.lon])).extend([lat, lon]), { padding: [30, 30] });
+  } else {
+    state.map.setView([lat, lon], 12);
+  }
   renderResults(centers, hospitals);
 }
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function safeHttpUrl(u) {
+  return /^https?:\/\//i.test(String(u ?? "")) ? esc(u) : null;
 }
 
 function card(it) {
@@ -94,13 +102,14 @@ function card(it) {
   const hours = it.hours ? `<p class="hours">${esc(it.hours)}</p>`
     : it.kind === "center" ? '<p class="hours muted">Hours not listed — call ahead</p>' : "";
   const phone = it.phone ? `<a href="tel:${esc(it.phone.replace(/[^\d+]/g, ""))}">${esc(it.phone)}</a> · ` : "";
+  const validSourceUrl = safeHttpUrl(it.source_url);
+  const sourceLink = validSourceUrl ? ` · <a href="${validSourceUrl}" target="_blank" rel="noopener">source</a>` : "";
   return `<article class="result-card">
     <h3>${esc(it.name)} ${badge}</h3>
     <p>${esc(it.address)}, ${esc(it.city)}, ${esc(it.state)} — <b>${fmtKmMiles(it.km)}</b></p>
     ${hours}
     <p>${phone}<a class="btn" target="_blank" rel="noopener"
-        href="${directionsUrl(it.name, it.address, it.city, it.state)}">Directions</a>
-       · <a href="${esc(it.source_url)}" target="_blank" rel="noopener">source</a></p>
+        href="${directionsUrl(it.name, it.address, it.city, it.state)}">Directions</a>${sourceLink}</p>
   </article>`;
 }
 
