@@ -73,20 +73,29 @@ function fmtOrNA(v, fmt) {
   return v == null ? "n/a" : fmt(v);
 }
 
+function tractTitle(p) {
+  return p.tract_name && p.county ? `${p.tract_name} — ${p.county}, ${p.state_abbr}` : `Tract ${p.GEOID}`;
+}
+
+function tractDetailsHTML(p) {
+  return `
+    <h3>${esc(tractTitle(p))}</h3>
+    <ul>
+      <li>Population: ${fmtOrNA(p.pop_total, fmtCount)}</li>
+      <li>3+ heat factors: ${fmtOrNA(p.pred3_e, fmtCount)} people (${fmtOrNA(p.pred3_pe, fmtPct)})</li>
+      <li>No AC: ${fmtOrNA(p.no_ac_e, fmtCount)} households (${fmtOrNA(p.no_ac_pe, fmtPct)})</li>
+      <li>Poverty: ${fmtOrNA(p.pov_below_e, fmtCount)} (${fmtOrNA(p.pct_poverty, fmtPct)}) ·
+          65+: ${fmtOrNA(p.pop_65plus, fmtCount)} ·
+          Disability: ${fmtOrNA(p.disability_e, fmtCount)} (${fmtOrNA(p.pct_disability, fmtPct)})</li>
+      <li>Nearest cooling center: ${fmtOrNA(p.nearest_cc_km, fmtKm)} <span class="muted">· GEOID ${esc(p.GEOID)}</span></li>
+    </ul>`;
+}
+
 function onEachTract(f, layer) {
-  layer.on("click", () => {
-    const p = f.properties;
-    document.getElementById("tract-info").innerHTML = `
-      <h3>Tract ${p.GEOID}</h3>
-      <ul>
-        <li>Population: ${fmtOrNA(p.pop_total, fmtCount)}</li>
-        <li>3+ heat factors: ${fmtOrNA(p.pred3_e, fmtCount)} people (${fmtOrNA(p.pred3_pe, fmtPct)})</li>
-        <li>No AC: ${fmtOrNA(p.no_ac_e, fmtCount)} households (${fmtOrNA(p.no_ac_pe, fmtPct)})</li>
-        <li>Poverty: ${fmtOrNA(p.pov_below_e, fmtCount)} (${fmtOrNA(p.pct_poverty, fmtPct)}) ·
-            65+: ${fmtOrNA(p.pop_65plus, fmtCount)} ·
-            Disability: ${fmtOrNA(p.disability_e, fmtCount)} (${fmtOrNA(p.pct_disability, fmtPct)})</li>
-        <li>Nearest cooling center: ${fmtOrNA(p.nearest_cc_km, fmtKm)}</li>
-      </ul>`;
+  layer.on("click", (e) => {
+    const html = tractDetailsHTML(f.properties);
+    document.getElementById("tract-info").innerHTML = html;
+    L.popup({ maxWidth: 320 }).setLatLng(e.latlng).setContent(html).openOn(state.map);
   });
 }
 
@@ -96,10 +105,10 @@ function renderLegend() {
     const lo = i === 0 ? "&lt; " + form.fmt(form.stops[0])
       : i === RAMP.length - 1 ? "&ge; " + form.fmt(form.stops[form.stops.length - 1])
       : `${form.fmt(form.stops[i - 1])}–${form.fmt(form.stops[i])}`;
-    return `<div class="legend-row"><span class="swatch" style="background:${color}"></span>${lo}</div>`;
+    return `<span class="legend-row"><span class="swatch" style="background:${color}"></span>${lo}</span>`;
   }).join("");
   document.getElementById("legend").innerHTML =
-    `<h3>${form.label}</h3>${rows}<div class="legend-row"><span class="swatch" style="background:${NO_DATA}"></span>no data / water</div>`;
+    `<span class="legend-title">${form.label}</span>${rows}<span class="legend-row"><span class="swatch" style="background:${NO_DATA}"></span>no data / water</span>`;
 }
 
 function syncModeControl() {
@@ -143,8 +152,9 @@ async function boot() {
     pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 4, color: "#7f1d1d", fillColor: "#dc2626", fillOpacity: 0.8, weight: 1 })
       .bindPopup(`<b>${esc(f.properties.name)}</b>`),
   });
-  document.querySelectorAll('#layer-picker input[name="layer"]').forEach((el) =>
-    el.addEventListener("change", () => { state.layerKey = el.value; redraw(); }));
+  document.getElementById("layer-select").addEventListener("change", (e) => {
+    state.layerKey = e.target.value; redraw();
+  });
   document.querySelectorAll('#show-as input[name="show-as"]').forEach((el) =>
     el.addEventListener("change", () => { state.mode = el.value; redraw(); }));
   document.getElementById("show-centers").addEventListener("change", (e) =>

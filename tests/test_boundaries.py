@@ -45,3 +45,31 @@ def test_shapefile_to_features_multipolygon_rounding(tmp_path):
     assert coords[0][0][0] == [-77.01235, 38.90123]
     # Second polygon's first ring's first coordinate
     assert coords[1][0][0] == [-76.62346, 39.29877]
+
+
+def make_fixture_shp_named(tmp_path):
+    w = shapefile.Writer(str(tmp_path / "fixn"), shapeType=shapefile.POLYGON)
+    w.field("GEOID", "C", size=11)
+    w.field("NAMELSAD", "C", size=40)
+    w.field("NAMELSADCO", "C", size=40)
+    w.field("STUSPS", "C", size=2)
+    w.poly([[(-77.01, 38.90), (-77.01, 38.91), (-77.00, 38.90), (-77.01, 38.90)]])
+    w.record("24013505101", "Census Tract 5051.01", "Carroll County", "MD")
+    w.close()
+    return tmp_path / "fixn.shp"
+
+
+def test_shapefile_to_features_keeps_identity_fields(tmp_path):
+    feats = shapefile_to_features(make_fixture_shp_named(tmp_path), precision=5)
+    p = feats[0]["properties"]
+    assert p["tract_name"] == "Census Tract 5051.01"
+    assert p["county"] == "Carroll County"
+    assert p["state_abbr"] == "MD"
+
+
+def test_shapefile_missing_identity_fields_still_works(tmp_path):
+    # the original minimal fixture (GEOID only) must not crash — fields become None
+    feats = shapefile_to_features(make_fixture_shp(tmp_path), precision=5)
+    p = feats[0]["properties"]
+    assert p["GEOID"] == "11001000100"
+    assert p["tract_name"] is None and p["county"] is None and p["state_abbr"] is None

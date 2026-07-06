@@ -34,13 +34,22 @@ def _round_coords(obj: list | tuple | float | int, precision: int) -> list | flo
 
 def shapefile_to_features(shp_path: Path, precision: int) -> list[dict]:
     reader = shapefile.Reader(str(shp_path))
-    geoid_idx = [f[0] for f in reader.fields[1:]].index("GEOID")
+    field_names = [f[0] for f in reader.fields[1:]]
+
+    def field(rec, name):
+        return rec[field_names.index(name)] if name in field_names else None
+
     feats = []
     for sr in reader.iterShapeRecords():
         geom = sr.shape.__geo_interface__
         feats.append({
             "type": "Feature",
-            "properties": {"GEOID": sr.record[geoid_idx]},
+            "properties": {
+                "GEOID": field(sr.record, "GEOID"),
+                "tract_name": field(sr.record, "NAMELSAD"),
+                "county": field(sr.record, "NAMELSADCO"),
+                "state_abbr": field(sr.record, "STUSPS"),
+            },
             "geometry": {"type": geom["type"], "coordinates": _round_coords(geom["coordinates"], precision)},
         })
     return feats

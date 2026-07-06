@@ -19,28 +19,29 @@
   </nav>
 </header>
 <main>
-  <section class="analysis-panel" aria-label="Map layer controls">
+  <section class="control-bar" aria-label="Map controls">
     <div id="show-as" role="radiogroup" aria-label="Show values as">
       <span class="control-label">Show as:</span>
       <label><input type="radio" name="show-as" value="pct" checked /> Percent of tract</label>
       <label><input type="radio" name="show-as" value="count" /> Number of people</label>
     </div>
-    <fieldset id="layer-picker">
-      <legend>Map layer
-        <details id="layers-help" class="help"><summary aria-label="About these layers">ⓘ</summary>
-          <p>CRE-Heat and LACE are U.S. Census Bureau <em>experimental</em> data products — modeled
-          estimates, not direct counts. "Percent of tract" shows how concentrated a condition is;
-          "Number of people" shows how many residents it affects. Note: the map colors whole tracts,
-          so geographically large tracts draw more attention than their population justifies.</p>
-        </details>
-      </legend>
-      <label><input type="radio" name="layer" value="heat" checked /> Heat vulnerability (CRE-Heat)</label>
-      <label><input type="radio" name="layer" value="no_ac" /> No air conditioning (LACE)</label>
-      <label><input type="radio" name="layer" value="poverty" /> Below poverty level</label>
-      <label><input type="radio" name="layer" value="age65" /> Age 65 and over</label>
-      <label><input type="radio" name="layer" value="disability" /> With a disability</label>
-      <label><input type="radio" name="layer" value="distance" /> Distance to nearest cooling center</label>
-    </fieldset>
+    <div class="layer-control">
+      <label class="control-label" for="layer-select">Map layer:</label>
+      <select id="layer-select">
+        <option value="heat" selected>Heat vulnerability (CRE-Heat)</option>
+        <option value="no_ac">No air conditioning (LACE)</option>
+        <option value="poverty">Below poverty level</option>
+        <option value="age65">Age 65 and over</option>
+        <option value="disability">With a disability</option>
+        <option value="distance">Distance to nearest cooling center</option>
+      </select>
+      <details id="layers-help" class="help"><summary aria-label="About these layers">ⓘ</summary>
+        <p>CRE-Heat and LACE are U.S. Census Bureau <em>experimental</em> data products — modeled
+        estimates, not direct counts. "Percent of tract" shows how concentrated a condition is;
+        "Number of people" shows how many residents it affects. Note: the map colors whole tracts,
+        so geographically large tracts draw more attention than their population justifies.</p>
+      </details>
+    </div>
     <div class="analysis-toggles">
       <label><input type="checkbox" id="show-centers" checked /> Show cooling centers</label>
       <label><input type="checkbox" id="show-hospitals" /> Show hospitals</label>
@@ -50,13 +51,9 @@
       </details>
     </div>
   </section>
-  <div class="finder-layout">
-    <div id="map" class="map map-tall" role="application" aria-label="Map of heat vulnerability by Census tract"></div>
-    <section class="results" aria-label="Legend and tract details">
-      <div id="legend"></div>
-      <div id="tract-info" aria-live="polite"></div>
-    </section>
-  </div>
+  <div id="legend" class="legend-bar" aria-label="Map legend"></div>
+  <div id="map" class="map map-tall" role="application" aria-label="Map of heat vulnerability by Census tract"></div>
+  <div id="tract-info" class="tract-bar" aria-live="polite">Click a tract for details.</div>
 </main>
 <section id="known-limitations" class="known-limitations" aria-labelledby="known-limitations-title" tabindex="-1">
   <h2 id="known-limitations-title">Known limitations &amp; coverage gaps</h2>
