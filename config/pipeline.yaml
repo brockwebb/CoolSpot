@@ -20,7 +20,7 @@ geocoder:
 hospitals:
   healthdata_url: "https://healthdata.gov/resource/anag-cw7u.json"
   cms_url: "https://data.cms.gov/provider-data/api/1/datastore/query/xubh-q36u/0"
-  cms_page_size: 1000
+  cms_page_size: 1000  # CMS datastore API rejects larger limits; do not raise
 
 cooling_sources:
   dc:

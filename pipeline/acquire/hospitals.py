@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from datetime import date
-from pathlib import Path
 
 import requests
 
@@ -13,6 +12,13 @@ from pipeline.config import PROJECT_ROOT
 SOURCE_URL = "https://healthdata.gov/Hospital/COVID-19-Reported-Patient-Impact-and-Hospital-Capa/anag-cw7u"
 SELECT_FIELDS = ("hospital_pk,hospital_name,address,city,state,zip,"
                  "fips_code,hospital_subtype,geocoded_hospital_address")
+
+DIRECTIONALS = {"Nw": "NW", "Ne": "NE", "Sw": "SW", "Se": "SE"}
+
+
+def smart_title(s: str) -> str:
+    """Title-case, preserving DC-style directional quadrant tokens (NW/NE/SW/SE)."""
+    return " ".join(DIRECTIONALS.get(w, w) for w in s.title().split())
 
 
 def fetch_healthdata(url: str, states: list[str], timeout: int) -> list[dict]:
@@ -59,9 +65,9 @@ def hospital_features(rows: list[dict], cms: dict[str, dict], retrieved: str) ->
             "type": "Feature",
             "geometry": {"type": "Point", "coordinates": point["coordinates"]},
             "properties": {
-                "name": row.get("hospital_name", "").title(),
-                "address": row.get("address", "").title(),
-                "city": row.get("city", "").title(),
+                "name": smart_title(row.get("hospital_name", "")),
+                "address": smart_title(row.get("address", "")),
+                "city": smart_title(row.get("city", "")),
                 "state": row.get("state"),
                 "zip": row.get("zip"),
                 "subtype": row.get("hospital_subtype"),

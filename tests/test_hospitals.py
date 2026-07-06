@@ -24,3 +24,9 @@ def test_hospital_features_geometry_and_enrichment():
 def test_unmatched_ccn_gets_none_enrichment():
     feats, _ = hospital_features([ROWS[0]], {}, "2026-07-05")
     assert feats[0]["properties"]["emergency_services"] is None
+
+
+def test_smart_title_preserves_quadrants():
+    from pipeline.acquire.hospitals import smart_title
+    assert smart_title("900 23RD ST NW") == "900 23Rd St NW"
+    assert smart_title("1310 SOUTHERN AVENUE  SE") == "1310 Southern Avenue SE"
