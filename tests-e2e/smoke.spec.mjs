@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
 
+// Block GoatCounter for every test: keeps CI/local runs from inflating the real
+// visitor count, and means every existing test doubles as fail-silent coverage
+// (the page must work with the counter tracking + badge unreachable).
+test.beforeEach(async ({ page }) => {
+  await page.route(/goatcounter\.com|gc\.zgo\.at/, (r) => r.abort());
+});
+
 test("finder loads with data and map", async ({ page }) => {
   const failures = [];
   page.on("response", (r) => { if (!r.ok() && r.url().includes("/data/")) failures.push(r.url()); });
@@ -165,4 +172,27 @@ test("gibberish still reaches the area picker", async ({ page }) => {
   await page.fill("#address-input", "zzqx nowhere");
   await page.click('#address-form button[type="submit"]');
   await expect(page.locator("#fallback-picker")).toBeVisible({ timeout: 15000 });
+});
+
+test("visitor counter present and page survives it being blocked", async ({ page }) => {
+  // GoatCounter is already aborted by beforeEach — this asserts the page is fine anyway.
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await expect(page.locator("#map .leaflet-tile-pane")).toBeAttached();
+  const img = page.locator("img.visitor-count");
+  await expect(img).toHaveAttribute("src", /brockwebb\.goatcounter\.com\/counter\/TOTAL\.svg/);
+  await expect(page.locator(".visitor-line")).toContainText("cookieless");
+  await expect(page.locator('script[src*="gc.zgo.at/count.js"]')).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
+
+test("analysis page also carries the counter and survives it blocked", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/analysis.html");
+  await expect(page.locator("#legend .legend-title")).toBeVisible({ timeout: 15000 });
+  await expect(page.locator("img.visitor-count")).toHaveCount(1);
+  await expect(page.locator('script[src*="gc.zgo.at/count.js"]')).toHaveCount(1);
+  expect(errors).toEqual([]);
 });

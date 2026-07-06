@@ -418,6 +418,17 @@ main {
   color: var(--color-gray);
 }
 
+.visitor-line {
+  margin-top: 0.5rem;
+}
+
+/* SVG counter badge; scales to the footer text. A blocked/failed image renders
+   nothing (empty alt) — the counter never affects layout or the map. */
+.visitor-count {
+  height: 1.5em;
+  vertical-align: -0.4em;
+}
+
 @media (min-width: 900px) {
   .finder-layout {
     grid-template-columns: 3fr 2fr;

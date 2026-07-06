@@ -26,7 +26,7 @@ design that can never break or block the emergency-relevant map.
 
 ## Design
 
-Two independent pieces under one GoatCounter site. `{{SITE_CODE}}` is the owner-chosen
+Two independent pieces under one GoatCounter site. `brockwebb` is the owner-chosen
 subdomain (default intent: `coolspot`), the **single** value to substitute; it appears in
 exactly two URLs.
 
@@ -35,7 +35,7 @@ exactly two URLs.
 One async script tag before `</body>` on **both** pages:
 
 ```html
-<script data-goatcounter="https://{{SITE_CODE}}.goatcounter.com/count"
+<script data-goatcounter="https://brockwebb.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
 ```
 
@@ -51,7 +51,7 @@ One async script tag before `</body>` on **both** pages:
 <p class="visitor-line">
   Visitors:
   <img class="visitor-count" alt=""
-       src="https://{{SITE_CODE}}.goatcounter.com/counter/TOTAL.svg?no_branding=1" />
+       src="https://brockwebb.goatcounter.com/counter/TOTAL.svg?no_branding=1" />
   · Anonymous, cookieless visit counts via
   <a href="https://www.goatcounter.com/" target="_blank" rel="noopener">GoatCounter</a>.
 </p>
@@ -86,7 +86,7 @@ footer badge. A JS-fetch version in exact site font (with the image as fallback)
 - Counter image unreachable/blocked → renders nothing; no error, no layout break (empty alt,
   fixed height reserves no jarring space). Verified by the fail-silent e2e test.
 - Tracking script unreachable → inert (`async`, nothing depends on it).
-- The feature is entirely inert until `{{SITE_CODE}}.goatcounter.com` exists; wiring can ship
+- The feature is entirely inert until `brockwebb.goatcounter.com` exists; wiring can ship
   before signup with no user-visible breakage.
 
 ## Testing
@@ -108,4 +108,4 @@ footer badge. A JS-fetch version in exact site font (with the image as fallback)
 ## The one open input
 
 Owner provides the confirmed GoatCounter site code (subdomain). Until then the two URLs carry
-`{{SITE_CODE}}`; substituting it is the first implementation step.
+`brockwebb`; substituting it is the first implementation step.

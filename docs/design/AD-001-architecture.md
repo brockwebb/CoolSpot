@@ -23,3 +23,15 @@ Date: 2026-07-05. Status: accepted.
    (press-release-only publication).
 7. **Directions = Google Maps deep links** (`maps/dir/?api=1`), not embedded API.
 8. **Pipeline is a CLI** (`coolspot`), per cross-project AD-003 (CLI over MCP).
+9. **Visitor counter = GoatCounter (privacy-first), image-embed display.** Added
+   2026-07-06. A deliberate, documented reversal of "on load the browser only
+   touches GitHub Pages + OSM": adds one cookieless, no-PII analytics call
+   (`brockwebb.goatcounter.com`). The visible count is an SVG `<img>` embed of the
+   site-wide `TOTAL` counter, NOT a JS fetch — GoatCounter's `/counter/*.json`
+   omits CORS headers from a third-party origin (arp242/goatcounter#782), and an
+   image embed fails silent: a blocked/failed image renders nothing and never
+   breaks the emergency-relevant map. Tracking via async `count.js`. Requires the
+   owner's "allow using the visitor counter" GoatCounter setting; the feature is
+   inert (invisible) until enabled. e2e blocks GoatCounter suite-wide so test runs
+   never inflate the real count. Rejected: Google Analytics / ad-funded counters
+   (track users), JS-fetch display (CORS + not fail-silent).
