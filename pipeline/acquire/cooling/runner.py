@@ -7,7 +7,7 @@ import json
 from datetime import date
 from pathlib import Path
 
-from pipeline.acquire.cooling import dc, md, md_counties, va
+from pipeline.acquire.cooling import baltimore, dc, md, md_counties, va
 from pipeline.config import PROJECT_ROOT
 from pipeline.schema import partition_records, write_quarantine
 
@@ -32,6 +32,8 @@ def _fetch_md(cfg: dict, timeout: int, retrieved: str) -> list[dict]:
         r = requests.get(url, timeout=timeout, headers={"User-Agent": "CoolSpot/0.1 (public heat-relief project)"})
         r.raise_for_status()
         recs.extend(md_counties.parse_county(county_key, r.text, retrieved, url))
+    recs.extend(baltimore.parse_libraries(baltimore.fetch_libraries(cfg, timeout), retrieved))
+    recs.extend(baltimore.parse_seniors(baltimore.fetch_seniors(cfg, timeout), retrieved))
     return recs
 
 
