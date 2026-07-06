@@ -8,6 +8,7 @@ from pathlib import Path
 
 REQUIRED_FIELDS = ("id", "name", "address", "city", "state", "jurisdiction", "source_url", "retrieved_date")
 VALID_STATES = {"DC", "MD", "VA"}
+VALID_SOURCE_TYPES = {"listed", "designated"}
 # Continental-US sanity window; catches null-island and swapped coords.
 LAT_RANGE, LON_RANGE = (17.0, 50.0), (-130.0, -60.0)
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -35,6 +36,9 @@ def validate_record(rec: dict) -> list[str]:
                 errs.append(f"lat/lon outside plausible range: {lat},{lon}")
         except (TypeError, ValueError):
             errs.append(f"lat/lon not numeric: {rec.get('lat')},{rec.get('lon')}")
+    st = rec.get("source_type")
+    if st is not None and st not in VALID_SOURCE_TYPES:
+        errs.append(f"source_type not in {sorted(VALID_SOURCE_TYPES)}: {st}")
     return errs
 
 

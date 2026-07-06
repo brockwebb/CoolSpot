@@ -48,6 +48,8 @@ def collect(cfg: dict, timeout: int, retrieved: str, fetchers=None) -> list[dict
             print(f"!! FAILED jurisdiction '{name}' — pipeline stops (fail loud).")
             raise
         print(f"    {len(got)} records")
+        for rec in got:
+            rec.setdefault("source_type", "listed")  # designation adapters set "designated" themselves
         records.extend(got)
     return records
 

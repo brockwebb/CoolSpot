@@ -40,3 +40,13 @@ def test_partition_and_quarantine(tmp_path, capsys):
 
 def test_quarantine_empty_returns_none(tmp_path):
     assert write_quarantine([], "unit_test", tmp_path) is None
+
+
+def test_source_type_valid_values():
+    assert validate_record({**GOOD, "source_type": "designated"}) == []
+    assert validate_record({**GOOD, "source_type": "listed"}) == []
+
+
+def test_source_type_invalid_rejected():
+    errs = validate_record({**GOOD, "source_type": "made-up"})
+    assert any("source_type" in e for e in errs)
