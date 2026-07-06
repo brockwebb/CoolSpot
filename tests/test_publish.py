@@ -53,3 +53,9 @@ def test_jurisdiction_summary_aggregates_all_source_urls():
     assert result["dc"]["count"] == 1
     assert result["dc"]["source_urls"] == ["https://dc.gov"]
     assert result["dc"]["retrieved_date"] == "2026-07-05"
+
+
+def test_site_config_includes_gap_min_affected():
+    from pipeline.config import load_config
+    cfg = load_config()
+    assert cfg["publish"]["gap_min_affected"] == 1500

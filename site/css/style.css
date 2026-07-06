@@ -84,8 +84,73 @@ a:focus, button:focus, input:focus, select:focus {
   font-weight: 600;
 }
 
-.site-header nav a[aria-current="page"] {
+.site-header nav:not(.seg-nav) a[aria-current="page"] {
   text-decoration: underline;
+}
+
+.seg-nav {
+  display: inline-flex;
+  border: 1px solid var(--color-teal);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.seg-nav a {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-teal);
+  text-decoration: none;
+}
+
+.seg-nav a + a {
+  border-left: 1px solid var(--color-teal);
+}
+
+.seg-nav a[aria-current="page"] {
+  background: var(--color-teal);
+  color: #fff;
+}
+
+#show-as {
+  margin-bottom: 0.5rem;
+}
+
+#show-as label {
+  margin-right: 0.9rem;
+}
+
+#show-as .control-label {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+#show-as.dimmed {
+  opacity: 0.45;
+}
+
+details.help {
+  display: inline-block;
+  font-size: 0.85rem;
+}
+
+details.help summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--color-teal);
+  font-weight: 700;
+  padding: 0 0.25rem;
+}
+
+details.help[open] {
+  display: block;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  margin-top: 0.3rem;
+  background: #fafafa;
+  max-width: 40rem;
 }
 
 main {
