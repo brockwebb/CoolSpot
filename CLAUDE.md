@@ -2,6 +2,15 @@
 
 **Project purpose:** CoolSpot is a public heat-relief finder for the DC, Maryland, and Virginia region. It provides a static site (built via GitHub Pages) that locates cooling centers, hospitals, and air-conditioned facilities alongside Census heat vulnerability and air-conditioning estimates to help residents find cooling during extreme heat events.
 
+## Captured HTML fixtures — strip scripts
+
+When saving a scraped page as a test fixture (`tests/fixtures/*.html`), **remove all
+`<script>` blocks first** (parsers only read visible DOM). Raw third-party pages embed
+their own API keys, analytics IDs, and session tokens in inline scripts — committing them
+verbatim trips GitHub secret scanning (happened once: BCPL's Google Maps key in the
+Baltimore libraries fixture, 2026-07-06). Strip scripts with BeautifulSoup
+(`for s in soup.find_all("script"): s.decompose()`) before committing.
+
 ## Architecture & Decisions
 
 See `docs/design/AD-001-architecture.md` for approved architectural decisions. Key constraints:
