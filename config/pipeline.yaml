@@ -35,8 +35,11 @@ cooling_sources:
   md:
     hub_url: "https://health.maryland.gov/preparedness/Pages/Cooling-Centers-Contact-List-2026.aspx"
     pg_arcgis_query_url: "https://gis.princegeorgescountymd.gov/arcgis/rest/services/EOC/COOLINGCENTERS/MapServer/0/query"
+    # baltimore_county intentionally omitted: its hot-weather page (captured
+    # 2026-07-05) lists only category descriptions and phone/link
+    # "check locations" pointers, no scrapeable per-center addresses.
+    # See tests/fixtures/md_baltimore_county.html and .superpowers/sdd/task-10-report.md.
     county_pages:
-      baltimore_county: "https://www.baltimorecountymd.gov/departments/health/hot-weather"
       anne_arundel: "https://www.aacounty.org/emergency-management/cooling-relief"
       howard: "https://www.howardcountymd.gov/community-sustainability/warming-and-cooling-center-information"
 
