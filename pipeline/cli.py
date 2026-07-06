@@ -8,6 +8,7 @@ from typing import Callable
 from pipeline.config import load_config
 from pipeline.acquire import census as acquire_census_mod
 from pipeline.acquire import hospitals as acquire_hospitals_mod
+from pipeline.acquire.cooling import runner as acquire_cooling_mod
 
 
 def _not_implemented(name: str) -> Callable[[dict], None]:
@@ -19,7 +20,7 @@ def _not_implemented(name: str) -> Callable[[dict], None]:
 COMMANDS: dict[str, Callable[[dict], None]] = {
     "acquire-census": acquire_census_mod.run,
     "acquire-hospitals": acquire_hospitals_mod.run,
-    "acquire-cooling": _not_implemented("acquire-cooling"),
+    "acquire-cooling": acquire_cooling_mod.run,
     "geocode": _not_implemented("geocode"),
     "publish": _not_implemented("publish"),
 }
