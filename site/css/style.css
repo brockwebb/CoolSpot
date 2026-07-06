@@ -358,6 +358,13 @@ main {
 .badge-cc { background: var(--color-teal); }
 .badge-er { background: var(--color-red); }
 .badge-hosp { background: var(--color-gray); }
+.badge-desig { background: #a16207; }   /* amber-brown: cooling-related but conditional */
+
+.result-card .card-note {
+  margin: 0.2rem 0;
+  font-size: 0.82rem;
+  color: var(--color-gray);
+}
 
 .result-card .directions {
   display: inline-block;

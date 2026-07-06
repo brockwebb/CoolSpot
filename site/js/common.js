@@ -53,9 +53,12 @@ export const KNOWN_LIMITATIONS = [
   },
   {
     title: "Maryland coverage is partial",
-    body: "Cooling centers are included for Prince George's, Anne Arundel, and Howard counties only; " +
-      "other Maryland counties are not yet covered. Baltimore County publishes no address-level " +
-      "cooling-center list, so it cannot be included — check the county's emergency-management page directly.",
+    body: "Cooling sites are included for Prince George's, Anne Arundel, Howard, and Baltimore " +
+      "counties. Baltimore County is included by designation — the county names all public " +
+      "library branches and senior centers as cooling sites during extreme-heat events rather " +
+      "than publishing a fixed list, so those entries are marked “Designated site”; " +
+      "confirm hours by calling ahead, and note senior centers primarily serve older adults. " +
+      "Maryland counties beyond these four are not yet covered.",
   },
   {
     title: "Delaware is not yet included",
