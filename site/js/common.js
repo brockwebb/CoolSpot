@@ -82,7 +82,9 @@ export const KNOWN_LIMITATIONS = [
   {
     title: "Address search covers standard U.S. addresses",
     body: "The finder uses the U.S. Census geocoder; very new construction or non-standard addresses may " +
-      "not match. If your address isn't found, pick the nearest listed area instead.",
+      "not match. If your address isn't found, pick the nearest listed area instead. You can also enter a " +
+      "city, town, or county name (e.g. 'Suitland, MD') for results around its center — a street address " +
+      "gives the most precise distances.",
   },
 ];
 

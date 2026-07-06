@@ -292,6 +292,30 @@ main {
   cursor: pointer;
 }
 
+#place-choices {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+#place-choices button {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--color-teal);
+  background: #fff;
+  color: var(--color-teal);
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#place-choices button:hover {
+  background: var(--color-teal);
+  color: #fff;
+}
+
 .finder-layout {
   display: grid;
   grid-template-columns: 1fr;

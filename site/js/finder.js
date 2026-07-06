@@ -1,7 +1,7 @@
 // finder.js — address search -> nearest cooling centers + hospitals.
 import { loadJSON, initMap, haversineKm, fmtKmMiles, directionsUrl, geocodeAddress, esc, renderFreshness, renderKnownLimitations } from "./common.js";
 
-const state = { map: null, cfg: null, centers: [], hospitals: [], markers: L.layerGroup(), youMarker: null };
+const state = { map: null, cfg: null, centers: [], hospitals: [], places: [], markers: L.layerGroup(), youMarker: null };
 
 function featureToItem(f, kind) {
   const [lon, lat] = f.geometry.coordinates;
@@ -9,13 +9,15 @@ function featureToItem(f, kind) {
 }
 
 async function boot() {
-  const [cfg, centersFC, hospitalsFC, manifest] = await Promise.all([
+  const [cfg, centersFC, hospitalsFC, manifest, places] = await Promise.all([
     loadJSON("data/site_config.json"), loadJSON("data/cooling_centers.geojson"),
     loadJSON("data/hospitals.geojson"), loadJSON("data/manifest.json"),
+    loadJSON("data/places.json").catch((err) => { console.warn(`places.json unavailable — place search disabled: ${err.message}`); return []; }),
   ]);
   state.cfg = cfg;
   state.centers = centersFC.features.map((f) => featureToItem(f, "center"));
   state.hospitals = hospitalsFC.features.map((f) => featureToItem(f, "hospital"));
+  state.places = places;
   state.map = initMap("map", cfg);
   state.markers.addTo(state.map);
   renderFreshness(manifest);
@@ -30,25 +32,71 @@ async function boot() {
   document.getElementById("address-form").addEventListener("submit", onSearch);
 }
 
+const STATE_TOKENS = { "dc": "DC", "district of columbia": "DC", "md": "MD", "maryland": "MD", "va": "VA", "virginia": "VA" };
+
+function normPlace(s) {
+  // Apostrophes DELETE (george's -> georges, matching the pipeline's match_key);
+  // periods/commas become spaces (st. -> st, "suitland, md" -> "suitland md").
+  return String(s).toLowerCase().replace(/['’]/g, "").replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function matchPlaces(input, places) {
+  let q = normPlace(input);
+  let stateFilter = null;
+  for (const [tok, st] of Object.entries(STATE_TOKENS).sort((a, b) => b[0].length - a[0].length)) {
+    if (q === tok) return [];                       // a bare state is not a place query
+    if (q.endsWith(" " + tok)) { stateFilter = st; q = q.slice(0, -(tok.length + 1)).trim(); break; }
+  }
+  if (!q) return [];
+  const pool = stateFilter ? places.filter((p) => p.state === stateFilter) : places;
+  const exact = pool.filter((p) => p.q === q);
+  if (exact.length) return exact.slice(0, 5);
+  return pool.filter((p) => p.q.startsWith(q)).slice(0, 5);
+}
+
+function showPlace(m) {
+  showNearest(m.lat, m.lon,
+    `Showing results near ${m.display} (place center — enter a street address for precise distances).`);
+}
+
+function handlePlaceMatches(matches) {
+  const status = document.getElementById("search-status");
+  const choices = document.getElementById("place-choices");
+  if (!matches.length) return false;
+  if (matches.length === 1) { showPlace(matches[0]); return true; }
+  status.textContent = "Multiple places match — choose one:";
+  choices.innerHTML = matches.map((m, i) =>
+    `<li><button type="button" data-i="${i}">${esc(m.display)}</button></li>`).join("");
+  choices.hidden = false;
+  choices.querySelectorAll("button").forEach((b) =>
+    b.addEventListener("click", () => { choices.hidden = true; showPlace(matches[Number(b.dataset.i)]); }));
+  return true;
+}
+
 async function onSearch(ev) {
   ev.preventDefault();
   const status = document.getElementById("search-status");
   const fallback = document.getElementById("fallback-picker");
-  status.textContent = "Looking up address…";
+  const choices = document.getElementById("place-choices");
   fallback.hidden = true;
+  choices.hidden = true;
+  choices.innerHTML = "";
+  const q = document.getElementById("address-input").value.trim();
+  const hasDigit = /\d/.test(q);
+  status.textContent = "Searching…";
+  if (!hasDigit && handlePlaceMatches(matchPlaces(q, state.places))) return;
+  let geocoderDown = false;
   try {
-    const q = document.getElementById("address-input").value.trim();
     const hit = await geocodeAddress(q);
-    if (!hit) {
-      status.textContent = "";
-      fallback.hidden = false;
-      return;
-    }
-    showNearest(hit.lat, hit.lon, `Results near ${hit.matched}`);
+    if (hit) { showNearest(hit.lat, hit.lon, `Results near ${hit.matched}`); return; }
   } catch (err) {
-    status.textContent = `Address lookup is unavailable (${err.message}). Pick an area below instead.`;
-    fallback.hidden = false;
+    geocoderDown = true;
   }
+  if (hasDigit && handlePlaceMatches(matchPlaces(q, state.places))) return;
+  status.textContent = geocoderDown
+    ? "Address lookup is unavailable right now. Try a city or county name, or pick an area below."
+    : "";
+  fallback.hidden = false;
 }
 
 function nearest(items, lat, lon, n) {
