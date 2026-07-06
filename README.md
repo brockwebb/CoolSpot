@@ -37,7 +37,7 @@ data pipeline. Deploys to: **https://brockwebb.github.io/CoolSpot/** (first depl
 | Howard County | Cooling center registry (HTML) | MD — Howard | retrieved 2026-07-06 |
 
 **Retrieval strategy:** each jurisdiction has its own adapter (ArcGIS REST query, HTML scrape, or
-static hub page) under `pipeline/cooling/`, normalized to a shared schema (`pipeline/schema.py`)
+static hub page) under `pipeline/acquire/cooling/`, normalized to a shared schema (`pipeline/schema.py`)
 and geocoded in bulk via the Census batch geocoder. Records that fail geocoding are quarantined
 (not silently dropped) to `data/quarantine/` with the reason, for manual follow-up.
 
