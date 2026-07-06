@@ -61,9 +61,11 @@ def _parse_anne_arundel(soup: BeautifulSoup, retrieved_date: str, source_url: st
     # <a class="icon-link-location"> per location reading "Name: Street, City".
     recs: list[dict] = []
     for heading in soup.select('div[class*="paragraph--type--heading"]'):
+        heading_text = heading.get_text(strip=True)
         hours_div = heading.find_next_sibling("div", class_="paragraph--type--text-editor")
         locs_div = hours_div.find_next_sibling("div", class_="paragraph--type--text-editor") if hours_div else None
         if locs_div is None:
+            print(f"!! md_counties[anne_arundel]: skipped section with no location div: {heading_text[:80]!r}")
             continue
         hours_text = hours_div.get_text(" ", strip=True) if hours_div else ""
         hours_text = re.sub(r"^Operating Days & Hours\s*", "", hours_text)
@@ -95,10 +97,13 @@ def _parse_howard(soup: BeautifulSoup, retrieved_date: str, source_url: str) -> 
     for li in soup.select('ul[type="disc"] > li'):
         strong = li.find("strong")
         if strong is None:
+            li_text = li.get_text(" ", strip=True)
+            print(f"!! md_counties[howard]: skipped li with no strong tag: {li_text[:80]!r}")
             continue
         name = re.sub(r"^\d+\s*-\s*", "", strong.get_text(strip=True)).strip()
         nested = li.find("ul")
         if nested is None:
+            print(f"!! md_counties[howard]: skipped facility with no nested ul: {name[:80]!r}")
             continue
         sub_lis = nested.find_all("li", recursive=False)
         addr_text = phone = hours_text = ""

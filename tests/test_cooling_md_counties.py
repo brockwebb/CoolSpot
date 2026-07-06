@@ -135,3 +135,52 @@ def test_howard_parser_warns_on_missing_address(capsys):
     captured = capsys.readouterr()
     assert "skipped unparseable" in captured.out
     assert "md_counties[howard]" in captured.out
+
+
+def test_anne_arundel_parser_warns_on_missing_location_div(capsys):
+    """Test that Anne Arundel parser warns when location div is missing after hours div."""
+    html = """
+    <div class="paragraph paragraph--type--heading">Valid Section</div>
+    <div class="paragraph paragraph--type--text-editor">Operating Days & Hours: M-F 9-5</div>
+    <div class="paragraph paragraph--type--text-editor">
+      <a class="icon-link-location">Valid Center: 100 Main St, Annapolis</a>
+    </div>
+    <div class="paragraph paragraph--type--heading">Police Station Lobbies</div>
+    <div class="paragraph paragraph--type--text-editor">Operating Days & Hours: M-F 9-5</div>
+    """
+    recs = parse_county("anne_arundel", html, "2026-07-05", "https://example.gov/aa")
+    # Well-formed record from first section should parse.
+    assert len(recs) >= 1
+    # Warning should appear in output for missing location div in second section.
+    captured = capsys.readouterr()
+    assert "skipped section with no location div" in captured.out
+    assert "md_counties[anne_arundel]" in captured.out
+    assert "Police Station Lobbies" in captured.out
+
+
+def test_howard_parser_warns_on_missing_nested_ul(capsys):
+    """Test that Howard parser warns when nested ul (sub-fields) is missing."""
+    html = """
+    <ul type="disc">
+      <li>
+        <strong>Valid Center</strong>
+        <ul>
+          <li>Address: 100 Main St, Ellicott City, MD 21043</li>
+          <li>Phone Numbers: 410-123-4567</li>
+          <li>Hours of Operation: M-F 9-5</li>
+        </ul>
+      </li>
+      <li>
+        <strong>No Subfields Center</strong>
+        <p>Some text but no nested ul</p>
+      </li>
+    </ul>
+    """
+    recs = parse_county("howard", html, "2026-07-05", "https://example.gov/howard")
+    # Well-formed record should parse.
+    assert len(recs) >= 1
+    # Warning should appear in output for missing nested ul.
+    captured = capsys.readouterr()
+    assert "skipped facility with no nested ul" in captured.out
+    assert "md_counties[howard]" in captured.out
+    assert "No Subfields Center" in captured.out
