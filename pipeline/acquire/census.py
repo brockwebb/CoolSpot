@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import requests
@@ -65,7 +66,74 @@ def lace_attrs(row: dict) -> dict:
     }
 
 
+ACS_SENTINEL_FLOOR = -222222222  # ACS uses large negative codes for N/A
+
+
+def fetch_acs(endpoint: str, get_vars: list[str], state_fips: str, api_key: str, timeout: int) -> list[list[str]]:
+    params = {
+        "get": ",".join(["NAME"] + get_vars),
+        "for": "tract:*",
+        "in": [f"state:{state_fips}", "county:*"],
+        "key": api_key,
+    }
+    r = requests.get(endpoint, params=params, timeout=timeout)
+    r.raise_for_status()
+    if not r.text.strip():
+        raise RuntimeError(
+            f"Empty ACS response from {endpoint} for state {state_fips} — "
+            "usually an invalid/missing CENSUS_API_KEY (the API now requires one)."
+        )
+    return r.json()
+
+
+def acs_rows_to_dict(rows: list[list[str]]) -> dict[str, dict[str, str]]:
+    header, out = rows[0], {}
+    for row in rows[1:]:
+        d = dict(zip(header, row))
+        out[d["state"] + d["county"] + d["tract"]] = d
+    return out
+
+
+def _acs_int(d: dict, var: str) -> int | None:
+    v = d.get(var)
+    if v is None or v == "":
+        return None
+    n = int(float(v))
+    return None if n <= ACS_SENTINEL_FLOOR else n
+
+
+def _pct(num: int | None, denom: int | None) -> float | None:
+    if num is None or not denom:
+        return None
+    return round(100.0 * num / denom, 1)
+
+
+def acs_attrs(detailed: dict, subject: dict) -> dict:
+    return {
+        "pop_total": _acs_int(detailed, "B01003_001E"),
+        "pop_65plus": _acs_int(subject, "S0101_C01_030E"),
+        "pop_65_alone": _acs_int(detailed, "B09021_023E"),
+        "pct_poverty": _pct(_acs_int(detailed, "B17001_002E"), _acs_int(detailed, "B17001_001E")),
+        "pct_no_vehicle": _pct(_acs_int(detailed, "B08201_002E"), _acs_int(detailed, "B08201_001E")),
+        "pct_disability": _pct(_acs_int(subject, "S1810_C02_001E"), _acs_int(subject, "S1810_C01_001E")),
+    }
+
+
 def run(cfg: dict) -> None:
+    from pipeline.config import require_env
     timeout = cfg["publish"]["request_timeout_s"]
     download_csv(cfg["census"]["cre_heat_tract_url"], RAW_DIR / "CRE22_Heat_Tract.csv", timeout)
     download_csv(cfg["census"]["lace_tract_url"], RAW_DIR / "LACE_23_Tract.csv", timeout)
+    api_key = require_env("CENSUS_API_KEY")
+    acs = cfg["census"]["acs"]
+    for st in cfg["states"]:
+        dest = RAW_DIR / f"acs_{st['abbr'].lower()}.json"
+        if dest.exists():
+            print(f"cached: {dest.name}")
+            continue
+        payload = {
+            "detailed": fetch_acs(acs["detailed_endpoint"], acs["detailed_vars"], st["fips"], api_key, timeout),
+            "subject": fetch_acs(acs["subject_endpoint"], acs["subject_vars"], st["fips"], api_key, timeout),
+        }
+        dest.write_text(json.dumps(payload))
+        print(f"downloaded: {dest.name}")
