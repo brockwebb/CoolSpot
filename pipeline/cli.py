@@ -6,6 +6,7 @@ import sys
 from typing import Callable
 
 from pipeline.config import load_config
+from pipeline.acquire import census as acquire_census_mod
 
 
 def _not_implemented(name: str) -> Callable[[dict], None]:
@@ -15,7 +16,7 @@ def _not_implemented(name: str) -> Callable[[dict], None]:
 
 
 COMMANDS: dict[str, Callable[[dict], None]] = {
-    "acquire-census": _not_implemented("acquire-census"),
+    "acquire-census": acquire_census_mod.run,
     "acquire-hospitals": _not_implemented("acquire-hospitals"),
     "acquire-cooling": _not_implemented("acquire-cooling"),
     "geocode": _not_implemented("geocode"),
