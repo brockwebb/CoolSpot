@@ -6,6 +6,7 @@ import math
 from datetime import date
 
 from pipeline import publish_tracts
+from pipeline.acquire import gazetteer
 from pipeline.config import PROJECT_ROOT
 from pipeline.geocode import GEOCODED_PATH
 
@@ -92,6 +93,8 @@ def run(cfg: dict) -> None:
         add_gap_distances(fc, center_points)
         p.write_text(json.dumps(fc, separators=(",", ":")))
     print("annotated tract files with nearest_cc_km")
+
+    gazetteer.run(cfg)
 
     juris = jurisdiction_summary(records)
     hosp_count = len(json.loads((out_dir / "hospitals.geojson").read_text())["features"])

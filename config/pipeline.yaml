@@ -12,6 +12,8 @@ census:
     detailed_vars: [B01003_001E, B09021_022E, B09021_023E, B17001_001E, B17001_002E, B08201_001E, B08201_002E]
     subject_vars: [S1810_C01_001E, S1810_C02_001E, S0101_C01_030E]
   boundaries_url_template: "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_{fips}_tract_500k.zip"
+  gazetteer_place_url: "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_place_national.zip"
+  gazetteer_county_url: "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_counties_national.zip"
 
 geocoder:
   batch_url: "https://geocoding.geo.census.gov/geocoder/locations/addressbatch"
