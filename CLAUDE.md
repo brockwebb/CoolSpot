@@ -11,8 +11,8 @@ See `docs/design/AD-001-architecture.md` for approved architectural decisions. K
 
 ## Specification & Planning
 
-- Full specification: `docs/specification.md`
-- Implementation plan: `docs/plan.md`
+- Full specification: `docs/superpowers/specs/2026-07-05-coolspot-design.md`
+- Implementation plan: `docs/superpowers/plans/2026-07-05-coolspot.md`
 
 ## Before You Push
 
