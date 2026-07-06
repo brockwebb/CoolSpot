@@ -10,7 +10,7 @@ from pipeline.acquire.census import (RAW_DIR, acs_attrs, acs_rows_to_dict,
 from pipeline.config import PROJECT_ROOT
 
 
-def build_state_geojson(features, cre_by_geoid, lace_by_geoid, acs_by_geoid, min_match_rate) -> dict:
+def build_state_geojson(features: list[dict], cre_by_geoid: dict[str, dict], lace_by_geoid: dict[str, dict], acs_by_geoid: dict[str, dict], min_match_rate: float) -> dict:
     matched = 0
     for f in features:
         geoid = f["properties"]["GEOID"]

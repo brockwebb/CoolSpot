@@ -24,7 +24,7 @@ def download_and_extract(url: str, dest_dir: Path, timeout: int) -> Path:
     return shp
 
 
-def _round_coords(obj, precision: int):
+def _round_coords(obj: list | tuple | float | int, precision: int) -> list | float | int:
     if isinstance(obj, (list, tuple)):
         if obj and isinstance(obj[0], (int, float)):
             return [round(float(c), precision) for c in obj]

@@ -38,6 +38,7 @@ def filter_state_rows(csv_path: Path, state_fips: set[str]) -> list[dict]:
         with open(csv_path, newline="", encoding="utf-8-sig") as f:
             return [row for row in csv.DictReader(f) if row.get("STATE") in state_fips]
     except UnicodeDecodeError:
+        print(f"note: {csv_path.name} decoded as cp1252 (not UTF-8)")
         with open(csv_path, newline="", encoding="cp1252") as f:
             return [row for row in csv.DictReader(f) if row.get("STATE") in state_fips]
 
