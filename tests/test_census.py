@@ -33,8 +33,26 @@ def test_missing_values_become_none():
     assert a["pred3_pe"] is None and a["exposed"] is None
 
 
+def test_lace_attrs_handles_float_formatted_int_fields():
+    """Real LACE rows format integer counts as floats (e.g. NO_AC_E='2.0')."""
+    a = lace_attrs({**LACE_ROW, "HSE_OCC_E": "672", "NO_AC_E": "2.0"})
+    assert a["hse_occ_e"] == 672 and a["no_ac_e"] == 2
+
+
 def test_filter_state_rows(tmp_path):
     p = tmp_path / "x.csv"
     p.write_text("GEO_ID,STATE,POPUNI\n1400000US24033802405,24,100\n1400000US06001000100,06,200\n")
+    rows = filter_state_rows(p, {"24", "51", "11"})
+    assert len(rows) == 1 and rows[0]["STATE"] == "24"
+
+
+def test_filter_state_rows_falls_back_to_cp1252(tmp_path):
+    """CRE-Heat national CSV ships Windows-1252 (accented territory place
+    names); a strict utf-8-sig decode raises UnicodeDecodeError."""
+    p = tmp_path / "x.csv"
+    header = "GEO_ID,STATE,POPUNI,NAME\n"
+    row_24 = "1400000US24033802405,24,100,Some Tract\n"
+    row_accented = "1400000US72001000100,72," + "200,Comunidad Ba\xf1os\n"
+    p.write_bytes((header + row_24 + row_accented).encode("cp1252"))
     rows = filter_state_rows(p, {"24", "51", "11"})
     assert len(rows) == 1 and rows[0]["STATE"] == "24"

@@ -30,8 +30,16 @@ def download_csv(url: str, dest: Path, timeout: int) -> Path:
 
 
 def filter_state_rows(csv_path: Path, state_fips: set[str]) -> list[dict]:
-    with open(csv_path, newline="", encoding="utf-8-sig") as f:
-        return [row for row in csv.DictReader(f) if row.get("STATE") in state_fips]
+    # Census flat-file exports are inconsistently encoded: LACE ships UTF-8,
+    # CRE-Heat ships Windows-1252 (accented place names in territories/PR
+    # rows break a strict utf-8-sig decode). Try utf-8-sig first, fall back
+    # to cp1252 rather than silently mangling or dropping bytes.
+    try:
+        with open(csv_path, newline="", encoding="utf-8-sig") as f:
+            return [row for row in csv.DictReader(f) if row.get("STATE") in state_fips]
+    except UnicodeDecodeError:
+        with open(csv_path, newline="", encoding="cp1252") as f:
+            return [row for row in csv.DictReader(f) if row.get("STATE") in state_fips]
 
 
 def tract_geoid(row: dict) -> str:
@@ -42,9 +50,16 @@ def tract_geoid(row: dict) -> str:
 
 
 def _num(value: str | None, cast=float):
-    """Census suppression/missing markers ('', '-999') -> None."""
+    """Census suppression/missing markers ('', '-999') -> None.
+
+    LACE ships integer-valued fields (e.g. NO_AC_E) formatted as floats
+    ("2.0"); int("2.0") raises ValueError, so int casts go through float()
+    first rather than assuming the source formatting matches the target type.
+    """
     if value is None or value.strip() in ("", "-999", "-999.0", "N"):
         return None
+    if cast is int:
+        return int(float(value))
     return cast(value)
 
 
