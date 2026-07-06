@@ -60,3 +60,39 @@ test("analysis view layer switch is interactive and performant", async ({ page }
   expect(loadToLegendMs).toBeLessThan(15000);
   expect(layerSwitchMs).toBeLessThan(5000);
 });
+
+test("percent/count toggle flips legend to separator counts", async ({ page }) => {
+  await page.goto("/analysis.html");
+  await expect(page.locator("#legend h3")).toContainText("% with 3+", { timeout: 15000 });
+  await page.locator('#show-as input[value="count"]').click();
+  await expect(page.locator("#legend h3")).toContainText("People with 3+");
+  await expect(page.locator("#legend .legend-row").nth(3)).toContainText("1,000"); // separator, round stop
+});
+
+test("distance layer disables the mode toggle", async ({ page }) => {
+  await page.goto("/analysis.html");
+  await expect(page.locator("#legend .legend-row").first()).toBeVisible({ timeout: 15000 });
+  await page.locator('#layer-picker input[value="distance"]').click();
+  await expect(page.locator('#show-as input[value="count"]')).toBeDisabled();
+  await expect(page.locator("#show-as")).toHaveClass(/dimmed/);
+  await page.locator('#layer-picker input[value="heat"]').click();
+  await expect(page.locator('#show-as input[value="count"]')).toBeEnabled();
+});
+
+test("underserved highlight and help disclosure", async ({ page }) => {
+  await page.goto("/analysis.html");
+  await expect(page.locator("#legend .legend-row").first()).toBeVisible({ timeout: 15000 });
+  await page.locator("#underserved-help summary").click();
+  await expect(page.locator("#underserved-help-text")).toContainText("8 km");
+  await expect(page.locator("#underserved-help-text")).toContainText("1,500 people");
+  await page.locator("#only-gaps").click();
+  // at 8km + 1500 affected, 155 tracts qualify; blue outline weight=2 stroke color #1d4ed8
+  await expect(page.locator('#map path[stroke="#1d4ed8"]').first()).toBeAttached();
+});
+
+test("segmented nav on both pages with correct active side", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator('.seg-nav a[aria-current="page"]')).toHaveText("Find cooling centers");
+  await page.goto("/analysis.html");
+  await expect(page.locator('.seg-nav a[aria-current="page"]')).toHaveText("Heat vulnerability map");
+});

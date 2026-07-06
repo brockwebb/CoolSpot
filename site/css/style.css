@@ -84,7 +84,7 @@ a:focus, button:focus, input:focus, select:focus {
   font-weight: 600;
 }
 
-.site-header nav a[aria-current="page"] {
+.site-header nav:not(.seg-nav) a[aria-current="page"] {
   text-decoration: underline;
 }
 
