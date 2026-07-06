@@ -20,7 +20,7 @@ geocoder:
 hospitals:
   healthdata_url: "https://healthdata.gov/resource/anag-cw7u.json"
   cms_url: "https://data.cms.gov/provider-data/api/1/datastore/query/xubh-q36u/0"
-  cms_page_size: 2000
+  cms_page_size: 1000
 
 cooling_sources:
   dc:
