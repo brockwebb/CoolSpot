@@ -49,6 +49,18 @@ def add_gap_distances(tract_fc: dict, center_points: list[tuple[float, float]]) 
         f["properties"]["nearest_cc_km"] = round(best, 1) if best is not None else None
 
 
+def jurisdiction_summary(records: list[dict]) -> dict[str, dict]:
+    """Aggregate records by jurisdiction, collecting all unique source URLs."""
+    juris: dict[str, dict] = {}
+    for r in records:
+        j = juris.setdefault(r["jurisdiction"], {"count": 0, "retrieved_date": r["retrieved_date"],
+                                                 "source_urls": []})
+        j["count"] += 1
+        if r["source_url"] not in j["source_urls"]:
+            j["source_urls"].append(r["source_url"])
+    return juris
+
+
 def run(cfg: dict) -> None:
     out_dir = PROJECT_ROOT / cfg["publish"]["site_data_dir"]
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -69,11 +81,7 @@ def run(cfg: dict) -> None:
         p.write_text(json.dumps(fc, separators=(",", ":")))
     print("annotated tract files with nearest_cc_km")
 
-    juris: dict[str, dict] = {}
-    for r in records:
-        j = juris.setdefault(r["jurisdiction"], {"count": 0, "retrieved_date": r["retrieved_date"],
-                                                 "source_url": r["source_url"]})
-        j["count"] += 1
+    juris = jurisdiction_summary(records)
     hosp_count = len(json.loads((out_dir / "hospitals.geojson").read_text())["features"])
     (out_dir / "manifest.json").write_text(json.dumps({
         "generated": date.today().isoformat(),

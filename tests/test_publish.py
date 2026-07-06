@@ -1,4 +1,4 @@
-from pipeline.publish import add_gap_distances, centroid, haversine_km, to_feature
+from pipeline.publish import add_gap_distances, centroid, haversine_km, jurisdiction_summary, to_feature
 
 REC = {"id": "dc-1", "name": "X", "address": "1 Main St", "city": "Washington", "state": "DC",
        "jurisdiction": "dc", "source_url": "https://e.gov", "retrieved_date": "2026-07-05",
@@ -29,3 +29,27 @@ def test_add_gap_distances():
         "properties": {"GEOID": "x"}}]}
     add_gap_distances(tract_fc, [(38.905, -76.995)])
     assert tract_fc["features"][0]["properties"]["nearest_cc_km"] < 2.0
+
+
+def test_jurisdiction_summary_aggregates_all_source_urls():
+    """Test that jurisdiction_summary collects all unique source URLs."""
+    records = [
+        {"jurisdiction": "md", "source_url": "https://pgarcgis.example.com", "retrieved_date": "2026-07-05"},
+        {"jurisdiction": "md", "source_url": "https://pgarcgis.example.com", "retrieved_date": "2026-07-05"},
+        {"jurisdiction": "md", "source_url": "https://county1.example.com", "retrieved_date": "2026-07-05"},
+        {"jurisdiction": "dc", "source_url": "https://dc.gov", "retrieved_date": "2026-07-05"},
+    ]
+    result = jurisdiction_summary(records)
+
+    # MD should have count 3 with both source URLs preserved in order
+    assert result["md"]["count"] == 3
+    assert result["md"]["source_urls"] == [
+        "https://pgarcgis.example.com",
+        "https://county1.example.com"
+    ]
+    assert result["md"]["retrieved_date"] == "2026-07-05"
+
+    # DC should have count 1
+    assert result["dc"]["count"] == 1
+    assert result["dc"]["source_urls"] == ["https://dc.gov"]
+    assert result["dc"]["retrieved_date"] == "2026-07-05"
