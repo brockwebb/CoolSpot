@@ -136,7 +136,7 @@ async function boot() {
 
   // Interpolate config values into the underserved definition — never hardcode thresholds in prose.
   document.getElementById("underserved-help-text").textContent =
-    `Highlighted tracts are ${state.cfg.gap_distance_km} km or more from every listed cooling center ` +
+    `Highlighted tracts are ${state.cfg.gap_distance_km} km or more from every cooling center ` +
     `AND are home to at least ${state.cfg.gap_min_affected.toLocaleString("en-US")} people with 3 or more ` +
     `heat-vulnerability risk factors (Census CRE-Heat estimate). These are the areas where a new cooling ` +
     `center would reach the most vulnerable people.`;

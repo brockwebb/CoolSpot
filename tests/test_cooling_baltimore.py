@@ -17,6 +17,7 @@ def test_parse_libraries_designated_records():
         assert r["notes"] and "call ahead" in r["notes"].lower()
         assert any(ch.isdigit() for ch in r["address"])
         assert r["source_url"].startswith("http")
+    assert any(r["phone"] for r in recs), "expected at least one library record with a phone"
 
 
 def test_parse_seniors_designated_and_audience_note():
@@ -27,6 +28,7 @@ def test_parse_seniors_designated_and_audience_note():
     for r in valid:
         assert r["source_type"] == "designated"
         assert "older adult" in r["notes"].lower()
+    assert any(r["phone"] for r in recs), "expected at least one senior-center record with a phone"
 
 
 def test_parse_libraries_excludes_closed_branch(capsys):

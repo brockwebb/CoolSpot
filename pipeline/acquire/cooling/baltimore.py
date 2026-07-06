@@ -52,7 +52,7 @@ SENIOR_CENTER_NAME_RE = re.compile(r"senior center$", re.IGNORECASE)
 # is a safety hazard, not a data-quality nit. Case-insensitive so it also catches
 # "Closed", "Temporarily closed", etc. Re-checked on every run, so a branch reappears
 # automatically once the source drops the notice.
-CLOSED_RE = re.compile(r"closed", re.IGNORECASE)
+CLOSED_RE = re.compile(r"\bclosed\b", re.IGNORECASE)
 
 
 def _slug(name: str) -> str:
@@ -64,7 +64,7 @@ def _is_closed(name: str, lines: list[str]) -> bool:
 
 
 def _record(kind: str, name: str, street: str, city: str, zc: str, directory_url: str,
-            retrieved: str, caveat: str) -> dict:
+            retrieved: str, caveat: str, phone: str = "") -> dict:
     return {
         "id": f"md-baltimore-{kind}-{_slug(name)}",
         "name": name.strip(), "address": street.strip(), "city": city.strip() or "Baltimore",
@@ -72,9 +72,19 @@ def _record(kind: str, name: str, street: str, city: str, zc: str, directory_url
         "source_type": "designated",
         "source_url": DESIGNATION_URL,      # the authority that designates it a cooling site
         "url": directory_url,               # where the address came from
+        "phone": phone.strip(),
         "notes": caveat,
         "retrieved_date": retrieved,
     }
+
+
+def _extract_phone(container) -> str:
+    """Best-effort phone extraction from a facility card's tel: link. Returns "" (not
+    fabricated) if the source card carries no phone — some facilities genuinely omit one."""
+    tel = container.select_one('a[href^="tel:"]')
+    if tel is None:
+        return ""
+    return tel.get_text(strip=True)
 
 
 def _address_lines(container, label_keyword: str) -> list[str] | None:
@@ -131,8 +141,11 @@ def parse_libraries(raw, retrieved_date: str) -> list[dict]:
         # The id slug is derived from this same enriched name (e.g. md-baltimore-lib-
         # arbutus-library); that's a one-time, cosmetic slug change, not worth threading
         # a separate id-vs-display-name parameter through _record for.
+        phone = _extract_phone(art)
         recs.append(_record("lib", f"{name} Library", street, m.group("city"), m.group("zip") or "",
-                             directory_url, retrieved_date, LIB_CAVEAT))
+                             directory_url, retrieved_date, LIB_CAVEAT, phone))
+    if not recs:
+        raise RuntimeError("baltimore[libraries]: 0 records parsed — source structure changed?")
     return recs
 
 
@@ -227,6 +240,9 @@ def parse_seniors(raw, retrieved_date: str) -> list[dict]:
         if not m:
             print(f"!! baltimore[seniors]: skipped unparseable city/zip line for {name!r}: {lines[-1]!r}")
             continue
+        phone = _extract_phone(art)
         recs.append(_record("senior", name, street, m.group("city"), m.group("zip") or "",
-                             directory_url, retrieved_date, SENIOR_CAVEAT))
+                             directory_url, retrieved_date, SENIOR_CAVEAT, phone))
+    if not recs:
+        raise RuntimeError("baltimore[seniors]: 0 records parsed — source structure changed?")
     return recs

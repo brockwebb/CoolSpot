@@ -24,6 +24,24 @@ def test_parse_pg_maps_fields():
     assert r["city"] == "Bowie" and r["state"] == "MD" and r["zip"] == "20716"
     assert r["lat"] == 38.9433 and r["lon"] == -76.7276
     assert r["jurisdiction"] == "md"
+    assert r["qc_note"] == ""
+
+
+def test_parse_pg_unsplit_address_sets_qc_note_not_notes():
+    # A record whose Address string doesn't match "<street>, <city>, MD <zip>" falls
+    # back to the whole string as street + county-level city. That fallback is an
+    # internal QC annotation — it must land in `qc_note`, which the finder does not
+    # render, never in the public-facing `notes` field.
+    raw = {"features": [{
+        "attributes": {"Name": "Unsplittable Center", "Address": "Somewhere weird with no commas",
+                       "Phone": "", "Hours": "", "OBJECTID": 99},
+        "geometry": {},
+    }]}
+    recs = parse_pg(raw, "2026-07-05")
+    assert len(recs) == 1
+    r = recs[0]
+    assert r["qc_note"] == "city inferred; address not split"
+    assert "notes" not in r, "PG records must not carry a public-facing `notes` field"
 
 
 def test_parse_hub_builds_registry():

@@ -175,7 +175,10 @@ test("designated Baltimore sites carry the badge and caveat", async ({ page }) =
     const fs = (await (await fetch("data/cooling_centers.geojson")).json()).features;
     return fs.some((f) => f.properties.source_type === "designated");
   });
-  test.skip(!hasDesignated, "no designated sites in payload");
+  // The payload is version-controlled — its absence here is a real regression
+  // (e.g. Baltimore's designated-source parsers silently dropping to 0 records),
+  // not a legitimate "nothing to test" skip condition.
+  expect(hasDesignated).toBe(true);
   await page.fill("#address-input", "towson md");
   await page.click('#address-form button[type="submit"]');
   await expect(page.locator("#search-status")).toContainText("Towson, MD");

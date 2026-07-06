@@ -39,10 +39,10 @@ def parse_pg(raw: dict, retrieved_date: str) -> list[dict]:
         m = MD_ADDR_RE.match(full)
         if m:
             street, city, zc = m.group("street"), m.group("city").strip(), m.group("zip") or ""
-            notes = ""
+            qc_note = ""
         else:
             street, city, zc = full, "Prince George's County", ""
-            notes = "city inferred; address not split"
+            qc_note = "city inferred; address not split"
         rec = {
             "id": f"md-pg-{a.get('OBJECTID')}",
             "name": (a.get("Name") or "").strip(),
@@ -50,7 +50,9 @@ def parse_pg(raw: dict, retrieved_date: str) -> list[dict]:
             "jurisdiction": "md",
             "hours": (a.get("Hours") or "").strip(),
             "phone": (a.get("Phone") or "").strip(),
-            "notes": notes,
+            # Internal QC annotation only — NOT rendered by the finder (which reads `notes`).
+            # Do not rename back to `notes`: that field is public-facing.
+            "qc_note": qc_note,
             "source_url": PG_SOURCE,
             "retrieved_date": retrieved_date,
         }
