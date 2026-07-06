@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CoolSpot — Heat Vulnerability Map (MD · VA · DC)</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <h1>CoolSpot</h1>
+  <p class="lede">Explore heat vulnerability and cooling access by Census tract in Maryland, Virginia, and Washington, DC.</p>
+  <p class="disclaimer">Informational only. Not an emergency service. In an emergency call 911.
+     Cooling center hours change — call before you go.</p>
+  <nav><a href="index.html">Finder</a> · <a href="analysis.html" aria-current="page">Heat vulnerability map</a></nav>
+</header>
+<main>
+  <section class="analysis-panel" aria-label="Map layer controls">
+    <fieldset id="layer-picker">
+      <legend>Map layer</legend>
+      <label><input type="radio" name="layer" value="pred3_pe" checked />
+        Heat vulnerability (CRE-Heat, % with 3+ risk factors)</label>
+      <label><input type="radio" name="layer" value="no_ac_pe" />
+        % households without AC (LACE)</label>
+      <label><input type="radio" name="layer" value="pct_poverty" />
+        % below poverty line</label>
+      <label><input type="radio" name="layer" value="pop_65plus" />
+        65+ residents</label>
+      <label><input type="radio" name="layer" value="pct_disability" />
+        % with a disability</label>
+      <label><input type="radio" name="layer" value="nearest_cc_km" />
+        Distance to nearest cooling center</label>
+    </fieldset>
+    <div class="analysis-toggles">
+      <label><input type="checkbox" id="show-centers" checked /> Show cooling centers</label>
+      <label><input type="checkbox" id="show-hospitals" /> Show hospitals</label>
+      <label><input type="checkbox" id="only-gaps" /> Highlight gap tracts</label>
+    </div>
+  </section>
+  <div class="finder-layout">
+    <div id="map" class="map map-tall" role="application" aria-label="Map of heat vulnerability by Census tract"></div>
+    <section class="results" aria-label="Legend and tract details">
+      <div id="legend"></div>
+      <div id="tract-info" aria-live="polite"></div>
+    </section>
+  </div>
+</main>
+<footer class="site-footer">
+  <p id="freshness"></p>
+  <p>Data: DC HSEMA · Virginia Dept. of Health / 211 Virginia · Maryland county sources ·
+     HHS/CMS hospital data · U.S. Census Bureau (CRE-Heat &amp; LACE, experimental data products).
+     <a href="https://github.com/brockwebb/CoolSpot">Source &amp; methodology</a></p>
+</footer>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script type="module" src="js/analysis.js"></script>
+</body>
+</html>
